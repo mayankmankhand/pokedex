@@ -1,0 +1,60 @@
+{
+  "name": "pokedex",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chat-based product lifecycle management. Manage requirements, test procedures, and test cases through conversation.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mayankmankhand/pokedex.git"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.58",
+    "@ai-sdk/react": "^3.0.118",
+    "@prisma/client": "^6.6.0",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@tailwindcss/typography": "^0.5.19",
+    "ai": "^6.0.116",
+    "dompurify": "^3.3.2",
+    "lucide-react": "^0.577.0",
+    "mermaid": "^11.13.0",
+    "next": "16.1.6",
+    "postcss": "^8.5.8",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "tailwindcss": "^4.2.1",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@playwright/test": "^1.58.2",
+    "@types/dompurify": "^3.0.5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "openai": "^6.27.0",
+    "playwright-core": "^1.58.2",
+    "prisma": "^6.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vitest": "^3.1.0"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  }
+}

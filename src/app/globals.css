@@ -1,0 +1,511 @@
+/* Tailwind CSS v4 - imports the framework and plugins. */
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Design tokens - Pokemon Indigo League theme (Issue #7)
+ * Palette: Hybrid - warm parchment surfaces + bold Pokemon Red/Blue accents
+ * Fonts: DM Sans + JetBrains Mono (kept for readability in data-heavy views)
+ *
+ * Design principle: "Chrome bold, data restrained"
+ * - Full-saturation color on small accents (buttons, badges, links)
+ * - Muted parchment on large surfaces (backgrounds, panels, cards)
+ * - Solid opaque surfaces with thick borders (no frosted glass)
+ *
+ * Use via Tailwind classes: bg-primary, text-text-muted, border-border, etc.
+ * Or via CSS variables: var(--color-primary), var(--color-surface), etc.
+ */
+@theme {
+  /* Core palette - warm parchment + Pokemon Red accent (Issue #7) */
+  --color-background: #F5F0EA;
+  --color-surface: #EAE4DC;
+  --color-surface-elevated: #FFFBF5;
+  --color-surface-hover: #DED8CE;
+  --color-surface-panel: #FFFBF5;
+  --color-primary: #DC2626;
+  --color-primary-hover: #B91C1C;
+  --color-primary-subtle: #FEE2E2;
+  --color-accent: #3D7DCA;
+  --color-text: #1C1917;
+  --color-text-muted: #57534E;
+  --color-text-subtle: #A8A29E;
+  --color-border: #78716C;
+  --color-border-subtle: #D6D3D1;
+
+  /* Semantic colors */
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #B91C1C;
+
+  /* Shadow tokens - warm-toned, slightly stronger for thick-border aesthetic */
+  --shadow-sm: 0 1px 3px rgba(28,25,23,0.06), 0 1px 2px rgba(28,25,23,0.04);
+  --shadow: 0 2px 8px rgba(28,25,23,0.08);
+  --shadow-lg: 0 8px 24px rgba(28,25,23,0.12);
+
+  /* Font references use the CSS variables set by next/font in layout.tsx. */
+  --font-heading: var(--font-dm-sans), system-ui, sans-serif;
+  --font-body: var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+}
+
+/* Base reset and defaults */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Modern thin scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* ── Chat markdown typography ──────────────────────────────── */
+/* Applied to assistant message content rendered via ReactMarkdown.
+ * Uses explicit backgrounds on block elements (pre, blockquote, table)
+ * because assistant messages have a transparent wrapper, so child elements
+ * would otherwise inherit the warm page background (#F5F0EA). */
+.chat-markdown {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+.chat-markdown p { margin: 0.5rem 0; }
+.chat-markdown p:first-child { margin-top: 0; }
+.chat-markdown p:last-child { margin-bottom: 0; }
+.chat-markdown ul,
+.chat-markdown ol { margin: 0.5rem 0; padding-left: 1.25rem; }
+.chat-markdown ul { list-style-type: disc; }
+.chat-markdown ol { list-style-type: decimal; }
+.chat-markdown li { margin: 0.25rem 0; }
+.chat-markdown h1 { font-size: 1.125rem; font-weight: 600; margin: 0.75rem 0; }
+.chat-markdown h2 { font-size: 1rem; font-weight: 600; margin: 0.75rem 0; }
+.chat-markdown h3 { font-size: 0.875rem; font-weight: 600; margin: 0.5rem 0; }
+.chat-markdown code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--color-surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.chat-markdown pre {
+  margin: 0.75rem 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+}
+.chat-markdown pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+.chat-markdown blockquote {
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface-elevated);
+  border-left: 3px solid var(--color-border);
+  border-radius: 0.25rem;
+}
+.chat-markdown table {
+  margin: 0.75rem 0;
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.chat-markdown th,
+.chat-markdown td {
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  text-align: left;
+  font-size: 0.875rem;
+}
+.chat-markdown th {
+  font-weight: 600;
+  background: var(--color-surface);
+}
+.chat-markdown a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── Streaming dots animation (three-dot pulse) ───────────── */
+.streaming-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  margin: 0 2px;
+  animation: dot-pulse 1.4s infinite ease-in-out both;
+}
+.streaming-dots span:nth-child(1) { animation-delay: 0s; }
+.streaming-dots span:nth-child(2) { animation-delay: 0.16s; }
+.streaming-dots span:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes dot-pulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Pulse dot for active tool indicators ──────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+/* Streaming indicator min-height to prevent CLS */
+.streaming-indicator {
+  min-height: 24px;
+}
+
+/* ── Thinking indicator text transition ─────────────────────── */
+/* Slide-up-and-fade-in when a new phrase mounts (triggered by React key change). */
+.thinking-text {
+  display: inline-block;
+  animation: thinking-slide-up 0.35s ease-out both;
+}
+
+@keyframes thinking-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Skeleton loader (shimmer effect for loading states) ───── */
+/* Warmer shimmer using elevated parchment tone as the highlight peak */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    var(--color-surface-elevated) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Phase 2 Panel Primitives (Issue #9) ─────────────────── */
+/* Shared structural classes for panel views. "Chrome bold, data restrained":
+ * card frames/headers carry the theme, card body content stays neutral.
+ * Wrapped in @layer components so Tailwind utilities can override when needed. */
+
+@layer components {
+  /* Framed Dex Entry card - bordered section with header stripe */
+  .dex-card {
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--color-surface-elevated);
+  }
+  .dex-card-header {
+    padding: 8px 14px;
+    background: var(--color-surface);
+    border-bottom: 2px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .dex-card-header-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .dex-card-body {
+    padding: 14px;
+  }
+
+  /* Audit source badges - small colored pills showing where an action originated */
+  .audit-source-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-left: 6px;
+  }
+  .audit-source-chat  { background: var(--color-primary-subtle); color: var(--color-primary); }
+  .audit-source-panel { background: var(--color-primary-subtle); color: var(--color-accent); }
+  .audit-source-api   { background: var(--color-surface);        color: #44403C; }
+
+  /* Fainted Pokeball - grayed-out error state icon (reuses spinner gradient pattern) */
+  .pokeball-fainted {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(
+      to bottom,
+      #A8A29E 0%, #A8A29E 42%,
+      var(--color-border) 42%, var(--color-border) 58%,
+      #D6D3D1 58%, #D6D3D1 100%
+    );
+    border: 3px solid var(--color-border);
+    position: relative;
+    opacity: 0.6;
+    filter: grayscale(1);
+  }
+  .pokeball-fainted::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-surface-elevated);
+    border: 2.5px solid var(--color-border);
+  }
+  /* X mark overlay on the center button */
+  .pokeball-fainted::before {
+    content: '\00D7';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-danger);
+  }
+}
+
+/* ── Panel resize handle ──────────────────────────────────── */
+.panel-resize-handle {
+  position: absolute;
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+  transition: background 0.15s;
+}
+.panel-resize-handle:hover,
+.panel-resize-handle.active {
+  background: var(--color-primary);
+  opacity: 0.35;
+  border-radius: 3px;
+}
+
+/* ── Pokeball spinner (Issue #7 - Pokemon theme loading state) */
+/* Pure CSS Pokeball that spins. Used in tool indicators and thinking state. */
+.pokeball-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary) 0%, var(--color-primary) 42%,
+    var(--color-border) 42%, var(--color-border) 58%,
+    #fff 58%, #fff 100%
+  );
+  border: 2px solid var(--color-border);
+  position: relative;
+  flex-shrink: 0;
+  animation: pokeball-spin 1s linear infinite;
+}
+.pokeball-spinner::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  border: 1.5px solid var(--color-border);
+}
+
+/* Small variant (14px) with proportionally scaled center dot */
+.pokeball-spinner-sm {
+  width: 14px;
+  height: 14px;
+}
+.pokeball-spinner-sm::after {
+  width: 4px;
+  height: 4px;
+  border-width: 1px;
+}
+
+@keyframes pokeball-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Phase 3: Pokemon animations and branding (Issue #10) ────────────── */
+/* Fan-inspired original designs. Not affiliated with or endorsed by
+ * Nintendo, Game Freak, or The Pokemon Company. */
+
+/* ── Streaming Pokeballs (Phase 3 - replaces streaming-dots visually) ── */
+/* Three mini 10px Pokeballs that bounce with staggered timing.
+ * Uses the same CSS Pokeball technique as .pokeball-spinner but smaller. */
+.streaming-pokeballs {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.streaming-pokeballs span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary) 0%, var(--color-primary) 42%,
+    var(--color-border) 42%, var(--color-border) 58%,
+    #fff 58%, #fff 100%
+  );
+  border: 1.5px solid var(--color-border);
+  position: relative;
+  flex-shrink: 0;
+  animation: pokeball-bounce 1.4s infinite ease-in-out both;
+}
+
+/* Tiny center button on each mini Pokeball */
+.streaming-pokeballs span::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+}
+
+/* Staggered bounce delays for the wave effect */
+.streaming-pokeballs span:nth-child(1) { animation-delay: 0s; }
+.streaming-pokeballs span:nth-child(2) { animation-delay: 0.15s; }
+.streaming-pokeballs span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes pokeball-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-4px) rotate(15deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-1px) rotate(-5deg);
+    opacity: 0.85;
+  }
+}
+
+/* ── Panel iris wipe transition (Phase 3 - battle encounter effect) ── */
+/* Dark overlay that reveals panel content via expanding circle clip-path.
+ * Applied as an absolutely-positioned overlay on panel open. */
+.panel-iris-wipe {
+  animation: iris-open 200ms ease-out forwards;
+  contain: paint;
+  pointer-events: none;
+}
+
+@keyframes iris-open {
+  from {
+    clip-path: circle(150% at center);
+  }
+  to {
+    clip-path: circle(0% at center);
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Static Pokeball when motion is reduced - no spin */
+  .pokeball-spinner {
+    animation: none !important;
+  }
+
+  /* Static mini Pokeballs - no bounce */
+  .streaming-pokeballs span {
+    animation: none !important;
+  }
+
+  /* Static skeleton - no shimmer sweep */
+  .skeleton {
+    animation: none !important;
+  }
+
+  /* Static thinking text - no slide-up on phrase change */
+  .thinking-text {
+    animation: none !important;
+  }
+
+  /* Instant panel reveal - no iris wipe circle animation */
+  .panel-iris-wipe {
+    animation: none !important;
+    clip-path: none !important;
+  }
+
+  /* Keep min-height for CLS prevention even with reduced motion */
+  .streaming-indicator {
+    min-height: 24px;
+  }
+}

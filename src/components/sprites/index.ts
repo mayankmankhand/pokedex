@@ -1,0 +1,1 @@
+export { TrainerSprite } from "./TrainerSprite";

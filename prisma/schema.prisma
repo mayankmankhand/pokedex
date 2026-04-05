@@ -1,0 +1,276 @@
+// Prisma schema for PLM (Product Lifecycle Management)
+// Uses Neon PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum RequirementStatus {
+  DRAFT
+  APPROVED
+  CANCELED
+}
+
+enum ProcedureStatus {
+  ACTIVE
+  CANCELED
+}
+
+enum ProcedureVersionStatus {
+  DRAFT
+  APPROVED
+}
+
+enum TestCaseStatus {
+  PENDING
+  PASSED
+  FAILED
+  BLOCKED
+  SKIPPED
+}
+
+enum TestCaseResult {
+  PASS
+  FAIL
+  BLOCKED
+  SKIPPED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  APPROVE
+  CANCEL
+  SKIP
+  ADD_ATTACHMENT
+  REMOVE_ATTACHMENT
+  CREATE_VERSION
+  RECORD_RESULT
+  CORRECT_RESULT
+  RE_EXECUTE
+  UPDATE_NOTES
+  RE_PARENT
+  REACTIVATE
+}
+
+enum AttachmentStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum TraceEventType {
+  USER_MESSAGE
+  AI_RESPONSE
+  TOOL_CALL
+  TOOL_RESULT
+  PANEL_ACTION
+  API_CALL
+  ERROR
+}
+
+enum AttachmentType {
+  DOCUMENT
+  IMAGE
+  SPREADSHEET
+  OTHER
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users           User[]
+  subRequirements SubRequirement[]
+
+  @@map("teams")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  role      String   // e.g. "engineer", "qa_lead", "pm"
+  teamId    String   @map("team_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  team      Team       @relation(fields: [teamId], references: [id])
+  auditLogs AuditLog[]
+
+  // Reverse relations for user FK constraints
+  createdProductRequirements ProductRequirement[]    @relation("pr_creator")
+  createdSubRequirements     SubRequirement[]        @relation("sr_creator")
+  createdTestProcedures      TestProcedure[]         @relation("tp_creator")
+  createdTestProcedureVersions TestProcedureVersion[] @relation("tpv_creator")
+  createdTestCases           TestCase[]              @relation("tc_creator")
+  executedTestCases          TestCase[]              @relation("tc_executor")
+  uploadedAttachments        Attachment[]            @relation("att_uploader")
+
+  @@map("users")
+}
+
+model ProductRequirement {
+  id          String              @id @default(uuid())
+  title       String
+  description String
+  status      RequirementStatus   @default(DRAFT)
+  createdBy   String              @map("created_by")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  creator         User               @relation("pr_creator", fields: [createdBy], references: [id])
+  subRequirements SubRequirement[]
+  attachments     Attachment[]
+
+  @@map("product_requirements")
+}
+
+model SubRequirement {
+  id                    String            @id @default(uuid())
+  title                 String
+  description           String
+  status                RequirementStatus @default(DRAFT)
+  productRequirementId  String            @map("product_requirement_id")
+  teamId                String            @map("team_id")
+  createdBy             String            @map("created_by")
+  createdAt             DateTime          @default(now()) @map("created_at")
+  updatedAt             DateTime          @updatedAt @map("updated_at")
+
+  creator            User               @relation("sr_creator", fields: [createdBy], references: [id])
+  productRequirement ProductRequirement @relation(fields: [productRequirementId], references: [id])
+  team               Team               @relation(fields: [teamId], references: [id])
+  testProcedures     TestProcedure[]
+  attachments        Attachment[]
+
+  @@map("sub_requirements")
+}
+
+model TestProcedure {
+  id               String          @id @default(uuid())
+  title            String
+  status           ProcedureStatus @default(ACTIVE)
+  subRequirementId String          @map("sub_requirement_id")
+  createdBy        String          @map("created_by")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  creator        User                 @relation("tp_creator", fields: [createdBy], references: [id])
+  subRequirement SubRequirement       @relation(fields: [subRequirementId], references: [id])
+  versions       TestProcedureVersion[]
+  attachments    Attachment[]
+
+  @@map("test_procedures")
+}
+
+// Immutable once approved. Each version belongs to a logical TestProcedure.
+model TestProcedureVersion {
+  id              String                 @id @default(uuid())
+  versionNumber   Int                    @map("version_number")
+  description     String
+  steps           String                 // Stored as text (could be JSON in future)
+  status          ProcedureVersionStatus @default(DRAFT)
+  testProcedureId String                 @map("test_procedure_id")
+  createdBy       String                 @map("created_by")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  creator       User          @relation("tpv_creator", fields: [createdBy], references: [id])
+  testProcedure TestProcedure @relation(fields: [testProcedureId], references: [id])
+  testCases     TestCase[]
+
+  @@unique([testProcedureId, versionNumber])
+  @@map("test_procedure_versions")
+}
+
+model TestCase {
+  id                     String         @id @default(uuid())
+  title                  String
+  description            String
+  status                 TestCaseStatus @default(PENDING)
+  result                 TestCaseResult?
+  notes                  String?
+  testProcedureVersionId String         @map("test_procedure_version_id")
+  executedBy             String?        @map("executed_by")
+  executedAt             DateTime?      @map("executed_at")
+  createdBy              String         @map("created_by")
+  createdAt              DateTime       @default(now()) @map("created_at")
+  updatedAt              DateTime       @updatedAt @map("updated_at")
+
+  creator              User                 @relation("tc_creator", fields: [createdBy], references: [id])
+  executor             User?                @relation("tc_executor", fields: [executedBy], references: [id])
+  testProcedureVersion TestProcedureVersion @relation(fields: [testProcedureVersionId], references: [id])
+  attachments          Attachment[]
+
+  @@map("test_cases")
+}
+
+// Exclusive Arc pattern: exactly one parent FK is non-null.
+// Enforced at the DB layer via CHECK constraint (see migration).
+model Attachment {
+  id                   String           @id @default(uuid())
+  fileName             String           @map("file_name")
+  fileUrl              String           @map("file_url")
+  fileType             AttachmentType   @map("file_type")
+  fileSizeBytes        Int?             @map("file_size_bytes")
+  status               AttachmentStatus @default(ACTIVE)
+  productRequirementId String?          @map("product_requirement_id")
+  subRequirementId     String?          @map("sub_requirement_id")
+  testProcedureId      String?          @map("test_procedure_id")
+  testCaseId           String?          @map("test_case_id")
+  uploadedBy           String           @map("uploaded_by")
+  createdAt            DateTime         @default(now()) @map("created_at")
+
+  uploader           User                @relation("att_uploader", fields: [uploadedBy], references: [id])
+  productRequirement ProductRequirement? @relation(fields: [productRequirementId], references: [id])
+  subRequirement     SubRequirement?     @relation(fields: [subRequirementId], references: [id])
+  testProcedure      TestProcedure?      @relation(fields: [testProcedureId], references: [id])
+  testCase           TestCase?           @relation(fields: [testCaseId], references: [id])
+
+  @@map("attachments")
+}
+
+// Observability trace events - ephemeral debugging data (7-day retention).
+// NOT audit-grade: deferred writes may be lost, and intermediate events
+// are best-effort. See PLAN-issue-11.md for the full design rationale.
+model TraceEvent {
+  id             String         @id @default(uuid())
+  sessionId      String         @map("session_id")
+  eventType      TraceEventType @map("event_type")
+  payload        Json           // Typed per event type - see trace.service.ts
+  requestId      String?        @map("request_id")
+  sequenceNumber Int            @default(0) @map("sequence_number")
+  source         String?        // "api" | "chat" | "panel"
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  @@index([sessionId, createdAt])
+  @@index([createdAt])
+  @@map("trace_events")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  actorId    String      @map("actor_id")
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String      @map("entity_id")
+  source     String      @default("api") // "api" | "chat" | "table"
+  requestId  String?     @map("request_id")
+  changes    Json?       // JSON diff of what changed
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

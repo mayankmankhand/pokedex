@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Environment (API keys)
+.env*.local
+.env
+.env.test
+
+# OS
+.DS_Store
+
+# Debug logs
+npm-debug.log*
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Temporary files
+/tmp/
+/_tmp/
+
+# Plan files (local working docs)
+PLAN-*.md
+
+# IDE (local Cursor settings - shared commands are in .claude/commands/)
+.cursor/
+
+.claude/worktrees/
+.vercel
+
+# Playwright
+/e2e-results/
+/playwright-report/
+/test-results/

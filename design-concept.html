@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokedex PLM - Design Concept</title>
+  <!--
+    Pokemon-Themed UI/UX Prototype (Issue #7, Step 0)
+
+    Three palette variants for visual comparison:
+    1. Gen 1 Classic - Pokemon Red GBC palette (whites, reds, dark accents)
+    2. Gen 3 Modern  - GBA-era palette (softer blues, warm tans)
+    3. Hybrid        - Desaturated surfaces + full-saturation Gen 1 accents
+
+    Also includes frosted glass vs solid surface comparison panel.
+    Double-click to open - no build step required.
+  -->
+  <style>
+    /* ============================================================
+       SHARED BASE STYLES (fonts, layout, reset)
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================================
+       PAGE LAYOUT - Variant selector + comparison grid
+       ============================================================ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    /* Variant tabs */
+    .variant-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .variant-tab {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 2px solid #334155;
+      background: transparent;
+      color: #94a3b8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .variant-tab:hover { border-color: #64748b; color: #e2e8f0; }
+    .variant-tab.active { border-color: var(--tab-accent, #DC2626); color: #fff; background: var(--tab-accent-bg, rgba(220,38,38,0.15)); }
+
+    /* The main comparison area */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto 48px;
+    }
+    @media (max-width: 900px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    .variant-frame {
+      display: none;
+    }
+    .variant-frame.active {
+      display: block;
+    }
+
+    /* Surface comparison section */
+    .surface-section {
+      max-width: 1400px;
+      margin: 0 auto 48px;
+    }
+    .surface-section h2 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .surface-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .surface-grid { grid-template-columns: 1fr; }
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ============================================================
+       POKEMON PALETTE DEFINITIONS
+       ============================================================ */
+
+    /* --- VARIANT 1: Gen 1 Classic (Pokemon Red GBC) --- */
+    .gen1 {
+      --color-background: #F8F0E3;
+      --color-surface: #EDE4D3;
+      --color-surface-elevated: #FFF8EE;
+      --color-surface-hover: #E5DCCB;
+      --color-primary: #DC2626;
+      --color-primary-hover: #B91C1C;
+      --color-primary-subtle: #FEE2E2;
+      --color-accent: #3D7DCA;
+      --color-text: #1C1917;
+      --color-text-muted: #57534E;
+      --color-text-subtle: #A8A29E;
+      --color-border: #44403C;
+      --color-border-subtle: #78716C;
+      --color-success: #16A34A;
+      --color-warning: #D97706;
+      --color-danger: #DC2626;
+      --border-weight: 2.5px;
+    }
+
+    /* --- VARIANT 2: Gen 3 Modern (GBA-era) --- */
+    .gen3 {
+      --color-background: #E8F0F8;
+      --color-surface: #D6E4F0;
+      --color-surface-elevated: #F0F6FC;
+      --color-surface-hover: #C8D8E8;
+      --color-primary: #2563EB;
+      --color-primary-hover: #1D4ED8;
+      --color-primary-subtle: #DBEAFE;
+      --color-accent: #E97820;
+      --color-text: #1E293B;
+      --color-text-muted: #475569;
+      --color-text-subtle: #94A3B8;
+      --color-border: #3B82F6;
+      --color-border-subtle: #93C5FD;
+      --color-success: #16A34A;
+      --color-warning: #D97706;
+      --color-danger: #DC2626;
+      --border-weight: 2px;
+    }
+
+    /* --- VARIANT 3: Hybrid (recommended) --- */
+    .hybrid {
+      --color-background: #F5F0EA;
+      --color-surface: #EAE4DC;
+      --color-surface-elevated: #FFFBF5;
+      --color-surface-hover: #DED8CE;
+      --color-primary: #DC2626;
+      --color-primary-hover: #B91C1C;
+      --color-primary-subtle: #FEE2E2;
+      --color-accent: #3D7DCA;
+      --color-text: #1C1917;
+      --color-text-muted: #57534E;
+      --color-text-subtle: #A8A29E;
+      --color-border: #78716C;
+      --color-border-subtle: #D6D3D1;
+      --color-success: #16A34A;
+      --color-warning: #D97706;
+      --color-danger: #DC2626;
+      --border-weight: 2px;
+    }
+
+    /* ============================================================
+       POKEMON TYPE COLORS (for status badges)
+       ============================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    /* Status -> Pokemon Type mapping */
+    .badge-draft    { background: #C6C1B5; color: #44403C; } /* Normal type */
+    .badge-approved { background: #BBF7D0; color: #14532D; } /* Grass type */
+    .badge-active   { background: #BFDBFE; color: #1E3A5F; } /* Water type */
+    .badge-pending  { background: #FEF3C7; color: #78350F; border: 1px solid #D6D3D1; } /* Ground type */
+    .badge-passed   { background: #BBF7D0; color: #14532D; } /* Grass type */
+    .badge-failed   { background: #FECACA; color: #7F1D1D; } /* Fire type */
+    .badge-blocked  { background: #E9D5FF; color: #581C87; } /* Poison type */
+    .badge-canceled { background: #E2D9F3; color: #3B1F6E; } /* Ghost type */
+    .badge-skipped  { background: #E7E5E4; color: #44403C; } /* Rock type */
+
+    /* ============================================================
+       APP MOCKUP COMPONENTS
+       ============================================================ */
+    .app-frame {
+      border-radius: 12px;
+      overflow: hidden;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-background);
+      color: var(--color-text);
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Header --- */
+    .app-header {
+      height: 48px;
+      padding: 0 20px;
+      border-bottom: var(--border-weight) solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--color-surface-elevated);
+    }
+    .app-header-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    /* CSS Pokeball icon */
+    .pokeball-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(
+        to bottom,
+        var(--color-primary) 0%, var(--color-primary) 42%,
+        var(--color-border) 42%, var(--color-border) 58%,
+        #fff 58%, #fff 100%
+      );
+      border: 2px solid var(--color-border);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .pokeball-icon::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-surface-elevated);
+      border: 1.5px solid var(--color-border);
+    }
+
+    .user-picker {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* --- Message Area --- */
+    .message-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding-top: 15vh;
+    }
+    .empty-state h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--color-text);
+    }
+    .empty-state p {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      margin-bottom: 20px;
+    }
+    .suggestion-chips {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .chip::before {
+      content: '\25B6';
+      font-size: 8px;
+      margin-right: 6px;
+      color: var(--color-text-muted);
+    }
+    .chip:hover {
+      background: var(--color-surface-hover);
+      border-color: var(--color-primary);
+    }
+
+    /* User message */
+    .msg-user {
+      align-self: flex-end;
+      max-width: 80%;
+      padding: 10px 16px;
+      border-radius: 16px 16px 4px 16px;
+      background: var(--color-surface);
+      border: var(--border-weight) solid var(--color-border);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* Assistant message */
+    .msg-assistant {
+      align-self: flex-start;
+      max-width: 85%;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--color-text);
+    }
+    .msg-assistant p { margin: 0.5rem 0; }
+    .msg-assistant code {
+      font-size: 13px;
+      background: var(--color-surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Thinking indicator */
+    .thinking {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--color-text-muted);
+    }
+    .thinking-dots {
+      display: flex;
+      gap: 4px;
+    }
+    .thinking-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      animation: dot-pulse 1.4s ease-in-out infinite;
+    }
+    .thinking-dots span:nth-child(2) { animation-delay: 0.16s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes dot-pulse {
+      0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Pokeball spinner */
+    .pokeball-spinner {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(
+        to bottom,
+        var(--color-primary) 0%, var(--color-primary) 42%,
+        var(--color-border) 42%, var(--color-border) 58%,
+        #fff 58%, #fff 100%
+      );
+      border: 2px solid var(--color-border);
+      position: relative;
+      animation: pokeball-spin 1s linear infinite;
+    }
+    .pokeball-spinner::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1.5px solid var(--color-border);
+    }
+    @keyframes pokeball-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Reduced motion: static pokeball + text only */
+    @media (prefers-reduced-motion: reduce) {
+      .pokeball-spinner { animation: none; }
+      .thinking-dots span { animation: none; opacity: 0.6; }
+    }
+
+    /* --- Composer --- */
+    .composer {
+      padding: 12px 20px 16px;
+    }
+    .composer-box {
+      border-radius: 12px;
+      background: var(--color-surface-elevated);
+      border: var(--border-weight) solid var(--color-border);
+      padding: 12px 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .composer-input {
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      color: var(--color-text);
+      outline: none;
+      resize: none;
+      min-height: 44px;
+    }
+    .composer-input::placeholder {
+      color: var(--color-text-subtle);
+    }
+    .composer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .composer-hint {
+      font-size: 11px;
+      color: var(--color-text-subtle);
+    }
+    .composer-hint kbd {
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--color-surface);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    /* Pokeball send button */
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--color-border);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(
+        to bottom,
+        var(--color-primary) 0%, var(--color-primary) 42%,
+        var(--color-border) 42%, var(--color-border) 58%,
+        #fff 58%, #fff 100%
+      );
+      transition: transform 0.15s;
+    }
+    .send-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-surface-elevated);
+      border: 2px solid var(--color-border);
+    }
+    .send-btn:hover { transform: scale(1.08); }
+
+    /* Send arrow overlay */
+    .send-btn-arrow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      width: 14px;
+      height: 14px;
+      color: var(--color-border);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       PANEL MOCKUP (table + badges)
+       ============================================================ */
+    .panel-frame {
+      border-radius: 12px;
+      overflow: hidden;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-background);
+      color: var(--color-text);
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      height: 48px;
+      padding: 0 16px;
+      border-bottom: var(--border-weight) solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--color-surface-elevated);
+    }
+    .panel-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-type-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-primary);
+      background: var(--color-primary-subtle);
+      padding: 3px 10px;
+      border-radius: 9999px;
+    }
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .panel-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .panel-close:hover { background: var(--color-surface-hover); color: var(--color-text); }
+
+    .panel-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-surface-elevated);
+      border: var(--border-weight) solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--color-surface);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      border-bottom: var(--border-weight) solid var(--color-border);
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      color: var(--color-text);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--color-surface-hover); }
+
+    .table-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+    .table-footer {
+      padding: 8px 14px;
+      font-size: 11px;
+      color: var(--color-text-subtle);
+      border-top: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+    }
+
+    /* Detail view section */
+    .detail-section {
+      margin-top: 20px;
+    }
+    .detail-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin-bottom: 12px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 24px;
+    }
+    .detail-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .detail-value {
+      font-size: 14px;
+      color: var(--color-text);
+    }
+
+    /* ============================================================
+       SURFACE COMPARISON (Frosted vs Solid)
+       ============================================================ */
+    .surface-demo {
+      border-radius: 12px;
+      height: 350px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .surface-demo-header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .surface-demo-content {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Frosted glass version */
+    .surface-frosted {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(203, 213, 225, 0.5);
+      color: #1E293B;
+    }
+
+    /* Solid surface version */
+    .surface-solid {
+      background: #FFFBF5;
+      border: 2.5px solid #78716C;
+      color: #1C1917;
+    }
+    .surface-solid .surface-demo-header {
+      background: #EAE4DC;
+      border-bottom: 2px solid #78716C;
+    }
+
+    .surface-bg-pattern {
+      position: relative;
+      background:
+        linear-gradient(135deg, #E8F0E0 25%, #B8D8A0 25%, #B8D8A0 50%, #E8F0E0 50%, #E8F0E0 75%, #B8D8A0 75%);
+      background-size: 40px 40px;
+      padding: 32px;
+    }
+
+    .surface-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .surface-frosted .surface-item {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(203,213,225,0.3);
+      color: #1E293B;
+    }
+    .surface-solid .surface-item {
+      background: #EAE4DC;
+      border: 1.5px solid #A8A29E;
+      color: #1C1917;
+    }
+
+    /* ============================================================
+       COLOR SWATCH PALETTE DISPLAY
+       ============================================================ */
+    .palette-display {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+    }
+    .swatch {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .swatch-color {
+      height: 40px;
+    }
+    .swatch-label {
+      padding: 6px 8px;
+      font-size: 10px;
+      background: rgba(0,0,0,0.3);
+    }
+    .swatch-label .name {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .swatch-label .hex {
+      font-family: 'JetBrains Mono', monospace;
+      color: #94a3b8;
+    }
+
+    /* ============================================================
+       BADGE SHOWCASE
+       ============================================================ */
+    .badge-showcase {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0;
+    }
+
+    /* ============================================================
+       NOTES / ANNOTATIONS
+       ============================================================ */
+    .note {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .note strong { color: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Pokedex PLM - Design Concept</h1>
+    <p>
+      Three palette variants for Issue #7. Pick the direction that feels right.
+      Each shows the chat interface (left) and context panel (right).
+      Scroll down for the frosted glass vs solid surface comparison.
+    </p>
+  </div>
+
+  <!-- Variant Selector Tabs -->
+  <div class="variant-tabs">
+    <button class="variant-tab active" data-variant="gen1" style="--tab-accent: #DC2626; --tab-accent-bg: rgba(220,38,38,0.15);">
+      Gen 1 Classic
+    </button>
+    <button class="variant-tab" data-variant="gen3" style="--tab-accent: #2563EB; --tab-accent-bg: rgba(37,99,235,0.15);">
+      Gen 3 Modern
+    </button>
+    <button class="variant-tab" data-variant="hybrid" style="--tab-accent: #DC2626; --tab-accent-bg: rgba(220,38,38,0.15);">
+      Hybrid (Recommended)
+    </button>
+  </div>
+
+  <!-- ===================== GEN 1 CLASSIC ===================== -->
+  <div class="variant-frame active" id="frame-gen1">
+    <div class="section-label" style="background: #FEE2E2; color: #991B1B;">Gen 1 Classic - Pokemon Red GBC Palette</div>
+    <div class="comparison-grid">
+
+      <!-- Chat side -->
+      <div class="gen1 app-frame">
+        <div class="app-header">
+          <div class="app-header-title">
+            <div class="pokeball-icon"></div>
+            POKEDEX
+          </div>
+          <span class="user-picker">Ash Ketchum</span>
+        </div>
+        <div class="message-area">
+          <div class="msg-user">Show me all test procedures for the Capture Module</div>
+          <div class="msg-assistant">
+            <p>I found <strong>3 test procedures</strong> for the Capture Module. Here's a quick summary:</p>
+            <p>The <code>TP-001</code> Ball Trajectory Test has 2 approved versions. <code>TP-002</code> Catch Rate Validation is still in draft.</p>
+          </div>
+          <div class="thinking">
+            <div class="pokeball-spinner"></div>
+            PIKACHU used SEARCH!
+          </div>
+        </div>
+        <div class="composer">
+          <div class="composer-box">
+            <textarea class="composer-input" placeholder="What will you do?" rows="1" readonly></textarea>
+            <div class="composer-actions">
+              <span class="composer-hint"><kbd>Ctrl+K</kbd> to focus</span>
+              <button class="send-btn" title="Send"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel side -->
+      <div class="gen1 panel-frame">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-type-badge">Table</span>
+            <span class="panel-title">Test Procedures</span>
+          </div>
+          <button class="panel-close">x</button>
+        </div>
+        <div class="panel-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Team</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="table-id">TP-001</td>
+                <td>Ball Trajectory Test</td>
+                <td><span class="badge badge-active">ACTIVE</span></td>
+                <td>Hardware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-002</td>
+                <td>Catch Rate Validation</td>
+                <td><span class="badge badge-draft">DRAFT</span></td>
+                <td>Firmware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-003</td>
+                <td>Pokeball Seal Integrity</td>
+                <td><span class="badge badge-approved">APPROVED</span></td>
+                <td>Hardware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-004</td>
+                <td>Quick Ball Response Time</td>
+                <td><span class="badge badge-canceled">CANCELED</span></td>
+                <td>Design</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-005</td>
+                <td>Master Ball Override Test</td>
+                <td><span class="badge badge-pending">PENDING</span></td>
+                <td>Field Testing</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-footer">Showing 5 of 18 procedures</div>
+
+          <div class="detail-section">
+            <div class="detail-section-title">Status Badges (Pokemon Type Colors)</div>
+            <div class="badge-showcase">
+              <span class="badge badge-draft">Draft</span>
+              <span class="badge badge-approved">Approved</span>
+              <span class="badge badge-active">Active</span>
+              <span class="badge badge-pending">Pending</span>
+              <span class="badge badge-passed">Passed</span>
+              <span class="badge badge-failed">Failed</span>
+              <span class="badge badge-blocked">Blocked</span>
+              <span class="badge badge-canceled">Canceled</span>
+              <span class="badge badge-skipped">Skipped</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-title">Detail Fields</div>
+            <div class="detail-grid">
+              <div>
+                <div class="detail-label">Status</div>
+                <div class="detail-value"><span class="badge badge-active">Active</span></div>
+              </div>
+              <div>
+                <div class="detail-label">Team</div>
+                <div class="detail-value">Hardware</div>
+              </div>
+              <div>
+                <div class="detail-label">Created By</div>
+                <div class="detail-value">Brock Harrison</div>
+              </div>
+              <div>
+                <div class="detail-label">Versions</div>
+                <div class="detail-value">2 (v1 Approved, v2 Draft)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color palette swatches -->
+    <div class="palette-display" style="max-width: 1400px; margin: 0 auto 24px;">
+      <div class="swatch"><div class="swatch-color" style="background: #F8F0E3;"></div><div class="swatch-label"><span class="name">Background</span><span class="hex">#F8F0E3</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #EDE4D3;"></div><div class="swatch-label"><span class="name">Surface</span><span class="hex">#EDE4D3</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #FFF8EE;"></div><div class="swatch-label"><span class="name">Elevated</span><span class="hex">#FFF8EE</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #DC2626;"></div><div class="swatch-label"><span class="name">Primary</span><span class="hex">#DC2626</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #3D7DCA;"></div><div class="swatch-label"><span class="name">Accent</span><span class="hex">#3D7DCA</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #1C1917;"></div><div class="swatch-label"><span class="name">Text</span><span class="hex">#1C1917</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #57534E;"></div><div class="swatch-label"><span class="name">Text Muted</span><span class="hex">#57534E</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #44403C;"></div><div class="swatch-label"><span class="name">Border</span><span class="hex">#44403C</span></div></div>
+    </div>
+    <div class="note" style="max-width: 1400px; margin: 0 auto 32px;">
+      <strong>Gen 1 Classic:</strong> Warm parchment surfaces, bold dark borders (2.5px), Pokemon Red primary.
+      High contrast, strong retro feel. Borders are very prominent - matches the thick dialog box outlines in the original Game Boy games.
+      Could feel heavy if not balanced carefully.
+    </div>
+  </div>
+
+  <!-- ===================== GEN 3 MODERN ===================== -->
+  <div class="variant-frame" id="frame-gen3">
+    <div class="section-label" style="background: #DBEAFE; color: #1E40AF;">Gen 3 Modern - GBA-Era Palette</div>
+    <div class="comparison-grid">
+
+      <!-- Chat side -->
+      <div class="gen3 app-frame">
+        <div class="app-header">
+          <div class="app-header-title">
+            <div class="pokeball-icon"></div>
+            POKEDEX
+          </div>
+          <span class="user-picker">Ash Ketchum</span>
+        </div>
+        <div class="message-area">
+          <div class="msg-user">Show me all test procedures for the Capture Module</div>
+          <div class="msg-assistant">
+            <p>I found <strong>3 test procedures</strong> for the Capture Module. Here's a quick summary:</p>
+            <p>The <code>TP-001</code> Ball Trajectory Test has 2 approved versions. <code>TP-002</code> Catch Rate Validation is still in draft.</p>
+          </div>
+          <div class="thinking">
+            <div class="pokeball-spinner"></div>
+            Checking the Pokedex...
+          </div>
+        </div>
+        <div class="composer">
+          <div class="composer-box">
+            <textarea class="composer-input" placeholder="What will you do?" rows="1" readonly></textarea>
+            <div class="composer-actions">
+              <span class="composer-hint"><kbd>Ctrl+K</kbd> to focus</span>
+              <button class="send-btn" title="Send"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel side -->
+      <div class="gen3 panel-frame">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-type-badge">Table</span>
+            <span class="panel-title">Test Procedures</span>
+          </div>
+          <button class="panel-close">x</button>
+        </div>
+        <div class="panel-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Team</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="table-id">TP-001</td>
+                <td>Ball Trajectory Test</td>
+                <td><span class="badge badge-active">ACTIVE</span></td>
+                <td>Hardware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-002</td>
+                <td>Catch Rate Validation</td>
+                <td><span class="badge badge-draft">DRAFT</span></td>
+                <td>Firmware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-003</td>
+                <td>Pokeball Seal Integrity</td>
+                <td><span class="badge badge-approved">APPROVED</span></td>
+                <td>Hardware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-004</td>
+                <td>Quick Ball Response Time</td>
+                <td><span class="badge badge-canceled">CANCELED</span></td>
+                <td>Design</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-005</td>
+                <td>Master Ball Override Test</td>
+                <td><span class="badge badge-pending">PENDING</span></td>
+                <td>Field Testing</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-footer">Showing 5 of 18 procedures</div>
+
+          <div class="detail-section">
+            <div class="detail-section-title">Status Badges (Pokemon Type Colors)</div>
+            <div class="badge-showcase">
+              <span class="badge badge-draft">Draft</span>
+              <span class="badge badge-approved">Approved</span>
+              <span class="badge badge-active">Active</span>
+              <span class="badge badge-pending">Pending</span>
+              <span class="badge badge-passed">Passed</span>
+              <span class="badge badge-failed">Failed</span>
+              <span class="badge badge-blocked">Blocked</span>
+              <span class="badge badge-canceled">Canceled</span>
+              <span class="badge badge-skipped">Skipped</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-title">Detail Fields</div>
+            <div class="detail-grid">
+              <div>
+                <div class="detail-label">Status</div>
+                <div class="detail-value"><span class="badge badge-active">Active</span></div>
+              </div>
+              <div>
+                <div class="detail-label">Team</div>
+                <div class="detail-value">Hardware</div>
+              </div>
+              <div>
+                <div class="detail-label">Created By</div>
+                <div class="detail-value">Brock Harrison</div>
+              </div>
+              <div>
+                <div class="detail-label">Versions</div>
+                <div class="detail-value">2 (v1 Approved, v2 Draft)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color palette swatches -->
+    <div class="palette-display" style="max-width: 1400px; margin: 0 auto 24px;">
+      <div class="swatch"><div class="swatch-color" style="background: #E8F0F8;"></div><div class="swatch-label"><span class="name">Background</span><span class="hex">#E8F0F8</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #D6E4F0;"></div><div class="swatch-label"><span class="name">Surface</span><span class="hex">#D6E4F0</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #F0F6FC;"></div><div class="swatch-label"><span class="name">Elevated</span><span class="hex">#F0F6FC</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #2563EB;"></div><div class="swatch-label"><span class="name">Primary</span><span class="hex">#2563EB</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #E97820;"></div><div class="swatch-label"><span class="name">Accent</span><span class="hex">#E97820</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #1E293B;"></div><div class="swatch-label"><span class="name">Text</span><span class="hex">#1E293B</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #475569;"></div><div class="swatch-label"><span class="name">Text Muted</span><span class="hex">#475569</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #3B82F6;"></div><div class="swatch-label"><span class="name">Border</span><span class="hex">#3B82F6</span></div></div>
+    </div>
+    <div class="note" style="max-width: 1400px; margin: 0 auto 32px;">
+      <strong>Gen 3 Modern:</strong> Cool blue surfaces, GBA-era feel. Blue primary + orange accent.
+      Feels more modern and polished, but further from the Gen 1 Indigo League vibe you referenced.
+      Good if you want "Pokemon-inspired" without the strong retro feel.
+    </div>
+  </div>
+
+  <!-- ===================== HYBRID (RECOMMENDED) ===================== -->
+  <div class="variant-frame" id="frame-hybrid">
+    <div class="section-label" style="background: #FEE2E2; color: #991B1B;">Hybrid (Recommended) - Muted Surfaces + Bold Accents</div>
+    <div class="comparison-grid">
+
+      <!-- Chat side -->
+      <div class="hybrid app-frame">
+        <div class="app-header">
+          <div class="app-header-title">
+            <div class="pokeball-icon"></div>
+            POKEDEX
+          </div>
+          <span class="user-picker">Ash Ketchum</span>
+        </div>
+        <div class="message-area">
+          <div class="msg-user">Show me all test procedures for the Capture Module</div>
+          <div class="msg-assistant">
+            <p>I found <strong>3 test procedures</strong> for the Capture Module. Here's a quick summary:</p>
+            <p>The <code>TP-001</code> Ball Trajectory Test has 2 approved versions. <code>TP-002</code> Catch Rate Validation is still in draft.</p>
+          </div>
+          <div class="thinking">
+            <div class="pokeball-spinner"></div>
+            Consulting Professor Oak...
+          </div>
+        </div>
+        <div class="composer">
+          <div class="composer-box">
+            <textarea class="composer-input" placeholder="What will you do?" rows="1" readonly></textarea>
+            <div class="composer-actions">
+              <span class="composer-hint"><kbd>Ctrl+K</kbd> to focus</span>
+              <button class="send-btn" title="Send"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel side -->
+      <div class="hybrid panel-frame">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-type-badge">Table</span>
+            <span class="panel-title">Test Procedures</span>
+          </div>
+          <button class="panel-close">x</button>
+        </div>
+        <div class="panel-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Team</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="table-id">TP-001</td>
+                <td>Ball Trajectory Test</td>
+                <td><span class="badge badge-active">ACTIVE</span></td>
+                <td>Hardware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-002</td>
+                <td>Catch Rate Validation</td>
+                <td><span class="badge badge-draft">DRAFT</span></td>
+                <td>Firmware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-003</td>
+                <td>Pokeball Seal Integrity</td>
+                <td><span class="badge badge-approved">APPROVED</span></td>
+                <td>Hardware</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-004</td>
+                <td>Quick Ball Response Time</td>
+                <td><span class="badge badge-canceled">CANCELED</span></td>
+                <td>Design</td>
+              </tr>
+              <tr>
+                <td class="table-id">TP-005</td>
+                <td>Master Ball Override Test</td>
+                <td><span class="badge badge-pending">PENDING</span></td>
+                <td>Field Testing</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-footer">Showing 5 of 18 procedures</div>
+
+          <div class="detail-section">
+            <div class="detail-section-title">Status Badges (Pokemon Type Colors)</div>
+            <div class="badge-showcase">
+              <span class="badge badge-draft">Draft</span>
+              <span class="badge badge-approved">Approved</span>
+              <span class="badge badge-active">Active</span>
+              <span class="badge badge-pending">Pending</span>
+              <span class="badge badge-passed">Passed</span>
+              <span class="badge badge-failed">Failed</span>
+              <span class="badge badge-blocked">Blocked</span>
+              <span class="badge badge-canceled">Canceled</span>
+              <span class="badge badge-skipped">Skipped</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-title">Detail Fields</div>
+            <div class="detail-grid">
+              <div>
+                <div class="detail-label">Status</div>
+                <div class="detail-value"><span class="badge badge-active">Active</span></div>
+              </div>
+              <div>
+                <div class="detail-label">Team</div>
+                <div class="detail-value">Hardware</div>
+              </div>
+              <div>
+                <div class="detail-label">Created By</div>
+                <div class="detail-value">Brock Harrison</div>
+              </div>
+              <div>
+                <div class="detail-label">Versions</div>
+                <div class="detail-value">2 (v1 Approved, v2 Draft)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color palette swatches -->
+    <div class="palette-display" style="max-width: 1400px; margin: 0 auto 24px;">
+      <div class="swatch"><div class="swatch-color" style="background: #F5F0EA;"></div><div class="swatch-label"><span class="name">Background</span><span class="hex">#F5F0EA</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #EAE4DC;"></div><div class="swatch-label"><span class="name">Surface</span><span class="hex">#EAE4DC</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #FFFBF5;"></div><div class="swatch-label"><span class="name">Elevated</span><span class="hex">#FFFBF5</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #DC2626;"></div><div class="swatch-label"><span class="name">Primary</span><span class="hex">#DC2626</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #3D7DCA;"></div><div class="swatch-label"><span class="name">Accent</span><span class="hex">#3D7DCA</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #1C1917;"></div><div class="swatch-label"><span class="name">Text</span><span class="hex">#1C1917</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #57534E;"></div><div class="swatch-label"><span class="name">Text Muted</span><span class="hex">#57534E</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: #78716C;"></div><div class="swatch-label"><span class="name">Border</span><span class="hex">#78716C</span></div></div>
+    </div>
+    <div class="note" style="max-width: 1400px; margin: 0 auto 32px;">
+      <strong>Hybrid (Recommended):</strong> Warm parchment surfaces like Gen 1, but with softer borders (2px instead of 2.5px, medium gray instead of near-black).
+      Full-saturation red and blue only on small accents (Pokeball button, badges, links).
+      Data regions stay calm and readable. The theme lives in the chrome, not the data. Best of both worlds.
+    </div>
+  </div>
+
+  <!-- ===================== SURFACE COMPARISON ===================== -->
+  <div class="surface-section">
+    <h2>Surface Treatment: Frosted Glass vs Solid</h2>
+    <p style="text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 20px;">
+      How should the context panel feel? Both shown against a patterned background to highlight the difference.
+    </p>
+    <div class="surface-grid">
+      <!-- Frosted Glass -->
+      <div>
+        <div class="section-label" style="background: rgba(255,255,255,0.1); color: #94a3b8;">Current: Frosted Glass</div>
+        <div class="surface-bg-pattern" style="border-radius: 12px; margin-top: 8px;">
+          <div class="surface-demo surface-frosted">
+            <div class="surface-demo-header">
+              <span style="font-size: 13px; font-weight: 600;">Context Panel</span>
+              <span style="font-size: 11px; color: #64748B;">x</span>
+            </div>
+            <div class="surface-demo-content">
+              <div class="surface-item">Ball Trajectory Test - <strong>ACTIVE</strong></div>
+              <div class="surface-item">Catch Rate Validation - <strong>DRAFT</strong></div>
+              <div class="surface-item">Pokeball Seal Integrity - <strong>APPROVED</strong></div>
+              <div style="font-size: 12px; color: #64748B; margin-top: 8px;">
+                Transparent, blurred. Modern feel but clashes with retro aesthetic.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solid Surface -->
+      <div>
+        <div class="section-label" style="background: rgba(255,255,255,0.1); color: #94a3b8;">Proposed: Solid Opaque</div>
+        <div class="surface-bg-pattern" style="border-radius: 12px; margin-top: 8px;">
+          <div class="surface-demo surface-solid">
+            <div class="surface-demo-header">
+              <span style="font-size: 13px; font-weight: 600; color: #1C1917;">Context Panel</span>
+              <span style="font-size: 11px; color: #57534E;">x</span>
+            </div>
+            <div class="surface-demo-content">
+              <div class="surface-item">Ball Trajectory Test - <strong>ACTIVE</strong></div>
+              <div class="surface-item">Catch Rate Validation - <strong>DRAFT</strong></div>
+              <div class="surface-item">Pokeball Seal Integrity - <strong>APPROVED</strong></div>
+              <div style="font-size: 12px; color: #57534E; margin-top: 8px;">
+                Opaque parchment + thick border. Matches Gen 1 dialog boxes. No visual confusion.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DESIGN NOTES ===================== -->
+  <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 48px;">
+    <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Design Notes</h2>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Fonts:</strong> DM Sans + JetBrains Mono stay as-is. No pixel fonts - readability matters in a data-heavy PLM app.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Status Badges:</strong> Mapped to Pokemon type colors (Draft=Normal, Approved=Grass, Active=Water, Failed=Fire, Blocked=Poison, Canceled=Ghost, Skipped=Rock, Pending=Ground, Passed=Grass).
+      Text labels are the primary communicator - color is an accent layer, not the only signal.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Pokeball Button:</strong> Pure CSS - no images. The send button uses a linear gradient (red top, band, white bottom) with a center circle.
+      Hovering scales it slightly. Subtle but recognizable.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Loading:</strong> One Pokeball spinner (CSS rotation). Thinking indicator cycles Pokemon battle phrases.
+      <code>prefers-reduced-motion</code> disables the spin and shows a static Pokeball + text only.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Guardrails:</strong> "Chrome bold, data restrained." Tables and detail fields stay calm.
+      The theme lives in headers, borders, buttons, and badges - not in the data cells.
+    </div>
+    <div class="note">
+      <strong>What's NOT in this prototype:</strong> Battle encounter transitions, trainer sprite avatars, favicon changes,
+      typewriter effects, Game Boy keyboard hints, bespoke panel redesigns. Those are Phase 2 and 3.
+    </div>
+  </div>
+
+  <!-- Tab switching script -->
+  <script>
+    document.querySelectorAll('.variant-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Update active tab
+        document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Show matching frame
+        const variant = tab.dataset.variant;
+        document.querySelectorAll('.variant-frame').forEach(f => f.classList.remove('active'));
+        document.getElementById('frame-' + variant).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

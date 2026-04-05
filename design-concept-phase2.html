@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokedex PLM - Phase 2 Panel Design Concept</title>
+  <!--
+    Phase 2 Panel Treatments (Issue #9)
+
+    Bespoke Pokemon treatments for each panel view.
+    Uses the Hybrid palette chosen in Phase 1.
+    Guardrail: "Chrome bold, data restrained"
+
+    Detail View has 3 variants for comparison:
+      A) Clean Stat Card - minimal, chunky dividers + type badge header
+      B) Framed Dex Entry - bordered sections like a Pokedex entry screen
+      C) Badge Bar - horizontal stat bar with type-colored accent stripe
+
+    All other views show a single recommended treatment.
+    Double-click to open - no build step required.
+  -->
+  <style>
+    /* ============================================================
+       SHARED BASE STYLES
+       ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================================
+       PAGE LAYOUT
+       ============================================================ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: #94a3b8;
+      max-width: 700px;
+      margin: 0 auto 12px;
+      line-height: 1.6;
+    }
+
+    /* Section headers */
+    .section-header {
+      max-width: 1400px;
+      margin: 48px auto 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #334155;
+    }
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .section-header p {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .section-header .guardrail {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(220,38,38,0.15);
+      color: #FCA5A5;
+      border: 1px solid rgba(220,38,38,0.3);
+    }
+
+    /* Variant tabs (for detail view) */
+    .variant-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .variant-tab {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 2px solid #334155;
+      background: transparent;
+      color: #94a3b8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .variant-tab:hover { border-color: #64748b; color: #e2e8f0; }
+    .variant-tab.active { border-color: #DC2626; color: #fff; background: rgba(220,38,38,0.15); }
+
+    .variant-frame { display: none; }
+    .variant-frame.active { display: block; }
+
+    /* Comparison grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto 24px;
+    }
+    .single-panel {
+      max-width: 680px;
+      margin: 0 auto 24px;
+    }
+    @media (max-width: 900px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Notes */
+    .note {
+      max-width: 1400px;
+      margin: 0 auto 32px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .note strong { color: #e2e8f0; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ============================================================
+       HYBRID PALETTE (from Phase 1)
+       ============================================================ */
+    .hybrid {
+      --color-background: #F5F0EA;
+      --color-surface: #EAE4DC;
+      --color-surface-elevated: #FFFBF5;
+      --color-surface-hover: #DED8CE;
+      --color-primary: #DC2626;
+      --color-primary-hover: #B91C1C;
+      --color-primary-subtle: #FEE2E2;
+      --color-accent: #3D7DCA;
+      --color-accent-subtle: #DBEAFE;
+      --color-text: #1C1917;
+      --color-text-muted: #57534E;
+      --color-text-subtle: #A8A29E;
+      --color-border: #78716C;
+      --color-border-subtle: #D6D3D1;
+      --color-success: #16A34A;
+      --color-warning: #D97706;
+      --color-danger: #DC2626;
+      --border-weight: 2px;
+    }
+
+    /* ============================================================
+       STATUS BADGES (Pokemon Type Colors)
+       ============================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .badge-draft    { background: #C6C1B5; color: #44403C; }
+    .badge-approved { background: #BBF7D0; color: #14532D; }
+    .badge-active   { background: #BFDBFE; color: #1E3A5F; }
+    .badge-pending  { background: #FEF3C7; color: #78350F; border: 1px solid #D6D3D1; }
+    .badge-passed   { background: #BBF7D0; color: #14532D; }
+    .badge-failed   { background: #FECACA; color: #7F1D1D; }
+    .badge-blocked  { background: #E9D5FF; color: #581C87; }
+    .badge-canceled { background: #E2D9F3; color: #3B1F6E; }
+    .badge-skipped  { background: #E7E5E4; color: #44403C; }
+
+    /* ============================================================
+       SHARED PANEL FRAME
+       ============================================================ */
+    .panel-frame {
+      border-radius: 12px;
+      overflow: hidden;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-background);
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      height: 48px;
+      padding: 0 16px;
+      border-bottom: var(--border-weight) solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--color-surface-elevated);
+    }
+    .panel-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-type-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-primary);
+      background: var(--color-primary-subtle);
+      padding: 3px 10px;
+      border-radius: 9999px;
+    }
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .panel-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .panel-close:hover { background: var(--color-surface-hover); color: var(--color-text); }
+
+    .panel-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    /* Back button */
+    .panel-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .panel-back:hover { background: var(--color-surface-hover); }
+
+    /* ============================================================
+       1. DETAIL VIEW VARIANTS
+       ============================================================ */
+
+    /* --- Shared detail styles --- */
+    .detail-entity-header {
+      margin-bottom: 16px;
+    }
+    .detail-entity-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+    .detail-entity-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin: 4px 0 8px;
+      line-height: 1.3;
+    }
+    .detail-entity-desc {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    /* --- Variant A: Clean Stat Card --- */
+    .detail-a .detail-fields {
+      border-top: var(--border-weight) solid var(--color-border);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+    .detail-a .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+    .detail-a .detail-row:last-child {
+      border-bottom: none;
+    }
+    .detail-a .detail-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+    }
+    .detail-a .detail-value {
+      font-size: 14px;
+      color: var(--color-text);
+      text-align: right;
+    }
+    .detail-a .detail-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin: 20px 0 8px;
+      padding-top: 16px;
+      border-top: var(--border-weight) solid var(--color-border);
+    }
+    .detail-a .detail-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .detail-chip {
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .detail-chip:hover {
+      background: var(--color-surface-hover);
+      border-color: var(--color-primary);
+    }
+    .detail-chip .chip-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-right: 4px;
+    }
+
+    /* --- Variant B: Framed Dex Entry --- */
+    .detail-b .detail-card {
+      border: var(--border-weight) solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--color-surface-elevated);
+    }
+    .detail-b .detail-card-header {
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border-bottom: var(--border-weight) solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .detail-b .detail-card-header-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+    .detail-b .detail-card-body {
+      padding: 14px;
+    }
+    .detail-b .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+    .detail-b .detail-row:last-child {
+      border-bottom: none;
+    }
+    .detail-b .detail-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+    }
+    .detail-b .detail-value {
+      font-size: 14px;
+      color: var(--color-text);
+    }
+    .detail-b .detail-card + .detail-card {
+      margin-top: 12px;
+    }
+
+    /* --- Variant C: Badge Bar --- */
+    .detail-c .detail-accent-bar {
+      height: 4px;
+      background: var(--color-primary);
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+    .detail-c .detail-meta-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: var(--border-weight) solid var(--color-border);
+    }
+    .detail-c .detail-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .detail-c .detail-meta-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-subtle);
+    }
+    .detail-c .detail-meta-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+    .detail-c .detail-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin: 16px 0 8px;
+    }
+    .detail-c .detail-desc-box {
+      padding: 12px;
+      background: var(--color-surface);
+      border-radius: 8px;
+      border: 1px solid var(--color-border-subtle);
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       2. TABLE VIEW - Pokedex List
+       ============================================================ */
+    .dex-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-surface-elevated);
+      border: var(--border-weight) solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .dex-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--color-surface);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      border-bottom: var(--border-weight) solid var(--color-border);
+    }
+    .dex-table td {
+      padding: 10px 14px;
+      border-bottom: var(--border-weight) solid var(--color-border-subtle);
+      color: var(--color-text);
+    }
+    .dex-table tr:last-child td { border-bottom: none; }
+    .dex-table tr {
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .dex-table tr:hover td { background: var(--color-surface-hover); }
+
+    .dex-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+    .dex-number::before {
+      content: '#';
+      color: var(--color-text-subtle);
+    }
+    .dex-table-footer {
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--color-text-muted);
+      border-top: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .show-more-btn {
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text);
+      cursor: pointer;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    .show-more-btn:hover { background: var(--color-surface-hover); }
+
+    /* ============================================================
+       3. AUDIT LOG - Battle Log Style
+       ============================================================ */
+    .audit-log {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .audit-entry {
+      padding: 10px 14px;
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--color-text);
+    }
+    .audit-entry + .audit-entry {
+      margin-top: 4px;
+    }
+    .audit-actor {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--color-text);
+    }
+    .audit-action {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--color-primary);
+    }
+    .audit-target {
+      font-weight: 500;
+      color: var(--color-accent);
+    }
+    .audit-timestamp {
+      display: block;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--color-text-subtle);
+      margin-top: 4px;
+    }
+    .audit-source-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-left: 6px;
+    }
+    .audit-source-chat { background: var(--color-primary-subtle); color: var(--color-primary); }
+    .audit-source-panel { background: var(--color-accent-subtle); color: #1E3A5F; }
+    .audit-source-api { background: var(--color-surface); color: var(--color-text-muted); }
+
+    .audit-log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .audit-log-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+    .audit-count {
+      font-size: 11px;
+      color: var(--color-text-subtle);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================================
+       4. CONFIRMATION DIALOG - Gen 1 Yes/No Box
+       ============================================================ */
+    .confirm-overlay {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .confirm-box {
+      border: var(--border-weight) solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-surface-elevated);
+      padding: 16px 20px;
+      max-width: 360px;
+      width: 100%;
+    }
+    .confirm-message {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--color-text);
+      margin-bottom: 16px;
+    }
+    .confirm-message strong {
+      color: var(--color-primary);
+    }
+    .confirm-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border: var(--border-weight) solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--color-surface-elevated);
+    }
+    .confirm-option {
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+      background: var(--color-surface-elevated);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      transition: background 0.1s;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+    .confirm-option:last-child {
+      border-bottom: none;
+    }
+    .confirm-option:hover {
+      background: var(--color-surface-hover);
+    }
+    .confirm-option.selected {
+      background: var(--color-surface);
+    }
+    .confirm-arrow {
+      color: var(--color-primary);
+      font-size: 12px;
+      font-weight: 700;
+      width: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .confirm-option:not(.selected) .confirm-arrow {
+      visibility: hidden;
+    }
+    .confirm-option-danger {
+      color: var(--color-danger);
+    }
+    .confirm-warning {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #FEF3C7;
+      border-radius: 6px;
+      border: 1px solid #D6D3D1;
+      color: #78350F;
+    }
+
+    /* ============================================================
+       5. DIAGRAM VIEW - Route Map Style
+       ============================================================ */
+    .diagram-container {
+      border: var(--border-weight) solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--color-surface-elevated);
+    }
+    .diagram-toolbar {
+      padding: 8px 12px;
+      background: var(--color-surface);
+      border-bottom: var(--border-weight) solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .diagram-toolbar-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+    }
+    .diagram-zoom-controls {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .diagram-zoom-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      color: var(--color-text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .diagram-zoom-btn:hover {
+      background: var(--color-surface-hover);
+    }
+    .diagram-zoom-label {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--color-text-muted);
+      min-width: 36px;
+      text-align: center;
+    }
+    .diagram-zoom-fit {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      color: var(--color-text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      margin-left: 4px;
+    }
+    .diagram-zoom-fit:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-text);
+    }
+    .diagram-canvas {
+      padding: 24px;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      /* Route map style - subtle grid pattern */
+      background:
+        radial-gradient(circle, var(--color-border-subtle) 1px, transparent 1px) 0 0 / 20px 20px,
+        var(--color-surface-elevated);
+    }
+    .diagram-copy-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      color: var(--color-text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    .diagram-copy-btn:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-text);
+    }
+
+    /* Fake Mermaid diagram nodes */
+    .fake-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .fake-node {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 2px solid;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      min-width: 140px;
+    }
+    .fake-node-approved { border-color: #16A34A; background: #F0FDF4; color: #14532D; }
+    .fake-node-draft { border-color: #78716C; background: #F5F0EA; color: #44403C; }
+    .fake-node-active { border-color: #3D7DCA; background: #EFF6FF; color: #1E3A5F; }
+    .fake-arrow {
+      color: var(--color-text-subtle);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* ============================================================
+       6. ERROR VIEW - Pokemon Themed
+       ============================================================ */
+    .error-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .error-pokeball {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(
+        to bottom,
+        #A8A29E 0%, #A8A29E 42%,
+        var(--color-border) 42%, var(--color-border) 58%,
+        #D6D3D1 58%, #D6D3D1 100%
+      );
+      border: 3px solid var(--color-border);
+      position: relative;
+      margin-bottom: 20px;
+      opacity: 0.7;
+    }
+    .error-pokeball::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-surface-elevated);
+      border: 3px solid var(--color-border);
+    }
+    /* X mark on the pokeball */
+    .error-pokeball::before {
+      content: '\00D7';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-danger);
+    }
+    .error-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .error-message {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+      max-width: 320px;
+      margin-bottom: 20px;
+    }
+    .error-action-btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: var(--border-weight) solid var(--color-border);
+      background: var(--color-surface-elevated);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      cursor: pointer;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      transition: all 0.15s;
+    }
+    .error-action-btn:hover {
+      background: var(--color-surface-hover);
+      border-color: var(--color-primary);
+    }
+    .error-code {
+      margin-top: 12px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--color-text-subtle);
+    }
+
+    /* ============================================================
+       BEFORE/AFTER COMPARISON
+       ============================================================ */
+    .before-label, .after-label {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+    .before-label { background: rgba(255,255,255,0.08); color: #94a3b8; }
+    .after-label { background: rgba(220,38,38,0.15); color: #FCA5A5; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Phase 2: Panel View Treatments</h1>
+    <p>
+      Bespoke Pokemon treatments for each panel view. Uses the Hybrid palette from Phase 1.
+      The Detail View has 3 variants to choose from. All other views show the recommended treatment.
+    </p>
+    <p style="margin-top: 4px;">
+      <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(220,38,38,0.15); color: #FCA5A5; border: 1px solid rgba(220,38,38,0.3);">
+        Guardrail: Chrome Bold, Data Restrained
+      </span>
+    </p>
+  </div>
+
+  <!-- =====================================================================
+       1. DETAIL VIEW - 3 VARIANTS
+       ===================================================================== -->
+  <div class="section-header">
+    <h2>1. Detail View</h2>
+    <p>How a single entity looks when you click into it. Three options - pick the one that feels right.</p>
+  </div>
+
+  <div class="variant-tabs">
+    <button class="variant-tab active" data-variant="detail-a">A: Clean Stat Card</button>
+    <button class="variant-tab" data-variant="detail-b">B: Framed Dex Entry</button>
+    <button class="variant-tab" data-variant="detail-c">C: Badge Bar</button>
+  </div>
+
+  <!-- Variant A: Clean Stat Card -->
+  <div class="variant-frame active" id="frame-detail-a">
+    <div class="single-panel">
+      <div class="hybrid panel-frame">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-type-badge">Test Procedure</span>
+            <span class="panel-title">TP-003</span>
+          </div>
+          <button class="panel-close">x</button>
+        </div>
+        <div class="panel-content detail-a">
+          <button class="panel-back">&larr; Back to list</button>
+
+          <div class="detail-entity-header">
+            <div class="detail-entity-id">TP-003</div>
+            <div class="detail-entity-title">Pokeball Seal Integrity</div>
+            <div><span class="badge badge-approved">Approved</span></div>
+          </div>
+
+          <div class="detail-entity-desc">
+            Validates that the Pokeball hermetic seal maintains vacuum integrity under standard battle conditions, including impact, heat, and rapid decompression during capture events.
+          </div>
+
+          <div class="detail-fields">
+            <div class="detail-row">
+              <span class="detail-label">Team</span>
+              <span class="detail-value">Hardware</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Created By</span>
+              <span class="detail-value">Brock Harrison</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Versions</span>
+              <span class="detail-value">2 (v1 Approved, v2 Draft)</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Sub-Requirement</span>
+              <span class="detail-value" style="color: var(--color-accent); cursor: pointer;">SR-005 Ball Housing</span>
+            </div>
+          </div>
+
+          <div class="detail-section-title">Related Test Cases</div>
+          <div class="detail-chips">
+            <div class="detail-chip"><span class="chip-id">TC-007</span> Seal Pressure Test <span class="badge badge-passed" style="margin-left: 6px; font-size: 10px;">PASSED</span></div>
+            <div class="detail-chip"><span class="chip-id">TC-008</span> Heat Resistance <span class="badge badge-pending" style="margin-left: 6px; font-size: 10px;">PENDING</span></div>
+            <div class="detail-chip"><span class="chip-id">TC-009</span> Impact Drop Test <span class="badge badge-failed" style="margin-left: 6px; font-size: 10px;">FAILED</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Variant A - Clean Stat Card:</strong> Minimal and familiar. Chunky top divider separates the header from fields.
+      Labels left, values right - like reading a Pokemon summary screen. Related entities are clickable chips.
+      This is the closest to what you already have, just with stronger visual separation and the stat-screen layout.
+    </div>
+  </div>
+
+  <!-- Variant B: Framed Dex Entry -->
+  <div class="variant-frame" id="frame-detail-b">
+    <div class="single-panel">
+      <div class="hybrid panel-frame">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-type-badge">Test Procedure</span>
+            <span class="panel-title">TP-003</span>
+          </div>
+          <button class="panel-close">x</button>
+        </div>
+        <div class="panel-content detail-b">
+          <button class="panel-back">&larr; Back to list</button>
+
+          <div class="detail-entity-header">
+            <div class="detail-entity-id">TP-003</div>
+            <div class="detail-entity-title">Pokeball Seal Integrity</div>
+            <div><span class="badge badge-approved">Approved</span></div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <span class="detail-card-header-title">Properties</span>
+              <span class="badge badge-approved" style="font-size: 10px;">Approved</span>
+            </div>
+            <div class="detail-card-body">
+              <div class="detail-row">
+                <span class="detail-label">Team</span>
+                <span class="detail-value">Hardware</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Created By</span>
+                <span class="detail-value">Brock Harrison</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Versions</span>
+                <span class="detail-value">2 (v1 Approved, v2 Draft)</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Sub-Requirement</span>
+                <span class="detail-value" style="color: var(--color-accent); cursor: pointer;">SR-005 Ball Housing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <span class="detail-card-header-title">Description</span>
+            </div>
+            <div class="detail-card-body">
+              <div style="font-size: 14px; color: var(--color-text); line-height: 1.5;">
+                Validates that the Pokeball hermetic seal maintains vacuum integrity under standard battle conditions, including impact, heat, and rapid decompression during capture events.
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <span class="detail-card-header-title">Related Test Cases</span>
+              <span style="font-size: 11px; color: var(--color-text-subtle);">3 items</span>
+            </div>
+            <div class="detail-card-body">
+              <div class="detail-chips" style="margin-top: 0;">
+                <div class="detail-chip"><span class="chip-id">TC-007</span> Seal Pressure Test <span class="badge badge-passed" style="margin-left: 6px; font-size: 10px;">PASSED</span></div>
+                <div class="detail-chip"><span class="chip-id">TC-008</span> Heat Resistance <span class="badge badge-pending" style="margin-left: 6px; font-size: 10px;">PENDING</span></div>
+                <div class="detail-chip"><span class="chip-id">TC-009</span> Impact Drop Test <span class="badge badge-failed" style="margin-left: 6px; font-size: 10px;">FAILED</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Variant B - Framed Dex Entry:</strong> Each section lives inside its own bordered card, like Pokedex info screens.
+      The card headers have their own background stripe - this is where the "chrome" lives.
+      More structured, each section is clearly separated. Slightly more visual weight than A.
+    </div>
+  </div>
+
+  <!-- Variant C: Badge Bar -->
+  <div class="variant-frame" id="frame-detail-c">
+    <div class="single-panel">
+      <div class="hybrid panel-frame">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-type-badge">Test Procedure</span>
+            <span class="panel-title">TP-003</span>
+          </div>
+          <button class="panel-close">x</button>
+        </div>
+        <div class="panel-content detail-c">
+          <button class="panel-back">&larr; Back to list</button>
+
+          <div class="detail-accent-bar"></div>
+
+          <div class="detail-entity-header">
+            <div class="detail-entity-id">TP-003</div>
+            <div class="detail-entity-title">Pokeball Seal Integrity</div>
+          </div>
+
+          <div class="detail-meta-row">
+            <div class="detail-meta-item">
+              <span class="detail-meta-label">Status</span>
+              <span class="detail-meta-value"><span class="badge badge-approved">Approved</span></span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="detail-meta-label">Team</span>
+              <span class="detail-meta-value">Hardware</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="detail-meta-label">Created By</span>
+              <span class="detail-meta-value">Brock Harrison</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="detail-meta-label">Versions</span>
+              <span class="detail-meta-value">2</span>
+            </div>
+          </div>
+
+          <div class="detail-section-title">Description</div>
+          <div class="detail-desc-box">
+            Validates that the Pokeball hermetic seal maintains vacuum integrity under standard battle conditions, including impact, heat, and rapid decompression during capture events.
+          </div>
+
+          <div class="detail-section-title">Lineage</div>
+          <div style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 8px;">
+            <span style="color: var(--color-accent); cursor: pointer;">PR-002 Capture System</span>
+            <span style="margin: 0 6px; color: var(--color-text-subtle);">&rarr;</span>
+            <span style="color: var(--color-accent); cursor: pointer;">SR-005 Ball Housing</span>
+            <span style="margin: 0 6px; color: var(--color-text-subtle);">&rarr;</span>
+            <span style="font-weight: 600; color: var(--color-text);">TP-003</span>
+          </div>
+
+          <div class="detail-section-title">Related Test Cases</div>
+          <div class="detail-chips" style="margin-top: 0;">
+            <div class="detail-chip"><span class="chip-id">TC-007</span> Seal Pressure Test <span class="badge badge-passed" style="margin-left: 6px; font-size: 10px;">PASSED</span></div>
+            <div class="detail-chip"><span class="chip-id">TC-008</span> Heat Resistance <span class="badge badge-pending" style="margin-left: 6px; font-size: 10px;">PENDING</span></div>
+            <div class="detail-chip"><span class="chip-id">TC-009</span> Impact Drop Test <span class="badge badge-failed" style="margin-left: 6px; font-size: 10px;">FAILED</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Variant C - Badge Bar:</strong> A red accent stripe at the top gives it color identity. Key metadata runs horizontally
+      in a compact row (status, team, creator) - like a quick-glance stat bar. Description gets its own subtle box.
+      Includes a lineage breadcrumb trail (PR &rarr; SR &rarr; TP). Lightest touch of the three options.
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       2. TABLE VIEW
+       ===================================================================== -->
+  <div class="section-header">
+    <h2>2. Table View - Pokedex List</h2>
+    <p>Entity lists with Pokedex-style numbering and chunkier row separators. Data stays clean and scannable.</p>
+    <span class="guardrail">Chrome: thick borders, #-prefix IDs. Data: plain text, no decoration.</span>
+  </div>
+
+  <div class="single-panel">
+    <div class="hybrid panel-frame">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <span class="panel-type-badge">Table</span>
+          <span class="panel-title">Test Procedures</span>
+        </div>
+        <button class="panel-close">x</button>
+      </div>
+      <div class="panel-content" style="padding: 16px;">
+        <table class="dex-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">No.</th>
+              <th>Title</th>
+              <th style="width: 100px;">Status</th>
+              <th style="width: 100px;">Team</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="dex-number">001</span></td>
+              <td>Ball Trajectory Test</td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>Hardware</td>
+            </tr>
+            <tr>
+              <td><span class="dex-number">002</span></td>
+              <td>Catch Rate Validation</td>
+              <td><span class="badge badge-draft">Draft</span></td>
+              <td>Firmware</td>
+            </tr>
+            <tr>
+              <td><span class="dex-number">003</span></td>
+              <td>Pokeball Seal Integrity</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+              <td>Hardware</td>
+            </tr>
+            <tr>
+              <td><span class="dex-number">004</span></td>
+              <td>Quick Ball Response Time</td>
+              <td><span class="badge badge-canceled">Canceled</span></td>
+              <td>Design</td>
+            </tr>
+            <tr>
+              <td><span class="dex-number">005</span></td>
+              <td>Master Ball Override Test</td>
+              <td><span class="badge badge-pending">Pending</span></td>
+              <td>Field Testing</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="dex-table-footer">
+          <span>Showing 5 of 18 procedures</span>
+          <button class="show-more-btn">Show more</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Table View:</strong> Pokedex-style <code>#001</code> numbering in monospace. Row separators are thicker (2px) to match the Gen 1 menu feel.
+    The "chrome" is in the header stripe, borders, and # prefix. Data cells are plain text - no colored backgrounds on content.
+    "Show more" button for pagination sits in a footer bar with a count.
+  </div>
+
+
+  <!-- =====================================================================
+       3. AUDIT LOG
+       ===================================================================== -->
+  <div class="section-header">
+    <h2>3. Audit Log - Bold Action Verbs</h2>
+    <p>History of changes. Actor names and action verbs in bold uppercase. Source badges show where the action came from.</p>
+    <span class="guardrail">Chrome: bold actor/action text, source badges. Data: timestamps, descriptions stay subtle.</span>
+  </div>
+
+  <div class="single-panel">
+    <div class="hybrid panel-frame">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <span class="panel-type-badge">Audit Log</span>
+          <span class="panel-title">TP-003 History</span>
+        </div>
+        <button class="panel-close">x</button>
+      </div>
+      <div class="panel-content">
+        <div class="audit-log-header">
+          <span class="audit-log-title">Activity</span>
+          <span class="audit-count">8 entries</span>
+        </div>
+        <div class="audit-log">
+          <div class="audit-entry">
+            <span class="audit-actor">BROCK</span> <span class="audit-action">APPROVED</span> <span class="audit-target">TP-003 v1</span>
+            <span class="audit-source-badge audit-source-panel">panel</span>
+            <span class="audit-timestamp">2026-03-28 14:32</span>
+          </div>
+          <div class="audit-entry">
+            <span class="audit-actor">MISTY</span> <span class="audit-action">CREATED VERSION</span> <span class="audit-target">TP-003 v2</span>
+            <span class="audit-source-badge audit-source-chat">chat</span>
+            <span class="audit-timestamp">2026-03-27 09:15</span>
+          </div>
+          <div class="audit-entry">
+            <span class="audit-actor">BROCK</span> <span class="audit-action">UPDATED</span> description on <span class="audit-target">TP-003</span>
+            <span class="audit-source-badge audit-source-panel">panel</span>
+            <span class="audit-timestamp">2026-03-25 16:48</span>
+          </div>
+          <div class="audit-entry">
+            <span class="audit-actor">ASH</span> <span class="audit-action">RE-PARENTED</span> <span class="audit-target">TP-003</span> to <span class="audit-target">SR-005 Ball Housing</span>
+            <span class="audit-source-badge audit-source-chat">chat</span>
+            <span class="audit-timestamp">2026-03-24 11:20</span>
+          </div>
+          <div class="audit-entry">
+            <span class="audit-actor">MISTY</span> <span class="audit-action">CREATED</span> <span class="audit-target">TP-003 Pokeball Seal Integrity</span>
+            <span class="audit-source-badge audit-source-api">api</span>
+            <span class="audit-timestamp">2026-03-20 08:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Audit Log:</strong> Actor names in bold uppercase (BROCK, MISTY) and action verbs in bold red uppercase (APPROVED, CREATED).
+    Professional, not battle-narration. Source badges (chat / panel / api) color-coded to show where the action originated.
+    Timestamps in monospace, subtle. The bold text is the "chrome" - everything else stays restrained.
+  </div>
+
+
+  <!-- =====================================================================
+       4. CONFIRMATION DIALOG
+       ===================================================================== -->
+  <div class="section-header">
+    <h2>4. Confirmation Dialog - Gen 1 Yes/No Box</h2>
+    <p>Destructive action confirmations styled like the in-game Yes/No selection box. Arrow cursor indicates the selected option.</p>
+    <span class="guardrail">Chrome: bordered box, arrow cursor. Data: clear action description.</span>
+  </div>
+
+  <div class="single-panel">
+    <div class="hybrid panel-frame" style="min-height: auto;">
+      <div class="panel-content">
+        <div class="confirm-overlay">
+          <div class="confirm-box">
+            <div class="confirm-message">
+              Cancel <strong>TP-004 Quick Ball Response Time</strong>?
+            </div>
+            <div class="confirm-warning">
+              This will also skip 2 pending test cases under this procedure.
+            </div>
+            <div class="confirm-actions" style="margin-top: 12px;">
+              <button class="confirm-option selected">
+                <span class="confirm-arrow">&gt;</span>
+                <span class="confirm-option-danger">Yes, cancel it</span>
+              </button>
+              <button class="confirm-option">
+                <span class="confirm-arrow">&gt;</span>
+                No, keep it
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Confirmation Dialog:</strong> A bordered box with a <code>&gt;</code> arrow cursor pointing at the selected option -
+    just like the Gen 1 Yes/No menus. The destructive option is in red. Warning text explains consequences in plain language.
+    The whole thing lives inside a compact card - no full-screen overlay needed.
+  </div>
+
+
+  <!-- =====================================================================
+       5. DIAGRAM VIEW
+       ===================================================================== -->
+  <div class="section-header">
+    <h2>5. Diagram View - Styled Controls</h2>
+    <p>Mermaid diagrams with themed zoom controls and subtle dot-grid background. Diagram content stays untouched.</p>
+    <span class="guardrail">Chrome: toolbar, zoom buttons, dot grid. Data: diagram nodes keep their existing colors.</span>
+  </div>
+
+  <div class="single-panel">
+    <div class="hybrid panel-frame" style="min-height: auto;">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <span class="panel-type-badge">Diagram</span>
+          <span class="panel-title">Traceability</span>
+        </div>
+        <button class="panel-close">x</button>
+      </div>
+      <div class="panel-content" style="padding: 0;">
+        <div class="diagram-container">
+          <div class="diagram-toolbar">
+            <div class="diagram-toolbar-title">Traceability Map</div>
+            <div class="diagram-zoom-controls">
+              <button class="diagram-zoom-btn">-</button>
+              <span class="diagram-zoom-label">100%</span>
+              <button class="diagram-zoom-btn">+</button>
+              <button class="diagram-zoom-fit">Fit</button>
+              <button class="diagram-copy-btn" style="margin-left: 8px;">Copy source</button>
+            </div>
+          </div>
+          <div class="diagram-canvas">
+            <!-- Fake diagram to show the style -->
+            <div class="fake-diagram">
+              <div class="fake-node fake-node-approved">PR-002 Capture System<br><span style="font-size: 10px; opacity: 0.7;">APPROVED</span></div>
+              <div class="fake-arrow">&darr;</div>
+              <div class="fake-node fake-node-approved">SR-005 Ball Housing<br><span style="font-size: 10px; opacity: 0.7;">APPROVED</span></div>
+              <div class="fake-arrow">&darr;</div>
+              <div class="fake-node fake-node-active">TP-003 Seal Integrity<br><span style="font-size: 10px; opacity: 0.7;">ACTIVE</span></div>
+              <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <div>
+                  <div class="fake-arrow">&darr;</div>
+                  <div class="fake-node fake-node-approved" style="font-size: 11px;">TC-007 Pressure<br><span style="font-size: 10px; opacity: 0.7;">PASSED</span></div>
+                </div>
+                <div>
+                  <div class="fake-arrow">&darr;</div>
+                  <div class="fake-node fake-node-draft" style="font-size: 11px;">TC-008 Heat<br><span style="font-size: 10px; opacity: 0.7;">PENDING</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Diagram View:</strong> Toolbar with themed zoom buttons (+, -, Fit) and a "Copy source" button.
+    Subtle dot-grid background gives a route-map feel without being distracting. The actual Mermaid diagram nodes
+    keep their status-based colors (green for approved, blue for active, etc.) - we only theme the frame around them.
+  </div>
+
+
+  <!-- =====================================================================
+       6. ERROR VIEW
+       ===================================================================== -->
+  <div class="section-header">
+    <h2>6. Error View - Fainted Pokeball</h2>
+    <p>When something goes wrong. A grayed-out Pokeball with an X mark. Professional error message, not battle narration.</p>
+    <span class="guardrail">Chrome: fainted Pokeball icon (CSS only). Data: clear error message + action button.</span>
+  </div>
+
+  <div class="single-panel">
+    <div class="hybrid panel-frame" style="min-height: auto;">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <span class="panel-type-badge" style="background: var(--color-surface); color: var(--color-text-muted);">Error</span>
+          <span class="panel-title" style="color: var(--color-text-muted);">Not Found</span>
+        </div>
+        <button class="panel-close">x</button>
+      </div>
+      <div class="panel-content">
+        <div class="error-container">
+          <div class="error-pokeball"></div>
+          <div class="error-title">Entity not found</div>
+          <div class="error-message">
+            The test procedure you're looking for doesn't exist or may have been removed.
+          </div>
+          <button class="error-action-btn">Go back</button>
+          <div class="error-code">404 - NOT_FOUND</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Error View:</strong> A grayed-out Pokeball with an X mark - like a "fainted" state. CSS/SVG only, no raster images.
+    The error message is clear and professional ("Entity not found"), not battle narration ("TRAINER blacked out!").
+    A simple action button to go back. Error code shown in subtle monospace at the bottom.
+  </div>
+
+
+  <!-- =====================================================================
+       DESIGN NOTES
+       ===================================================================== -->
+  <div style="max-width: 1400px; margin: 48px auto 0; padding-bottom: 48px;">
+    <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Design Notes</h2>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Guardrail applied:</strong> "Chrome bold, data restrained." In every view, the theme lives in borders, headers, badges, and accent elements.
+      Data cells, descriptions, and field values stay in neutral colors with no decorative treatment.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Detail View decision:</strong> You have 3 options. A is the lightest touch (upgrade of current). B adds Pokedex-style framed cards.
+      C uses a colored accent bar and horizontal stat layout. Pick whichever feels right - they all follow the same guardrail.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>Audit log tone:</strong> Bold uppercase actor + action verb, but no battle narration. "BROCK APPROVED TP-003" not "BROCK used APPROVE! It's super effective!"
+      Professional with personality.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>New elements:</strong> Source badges on audit entries (chat/panel/api), Pokedex # numbering on tables,
+      Gen 1 arrow-cursor confirmation box, fainted Pokeball error state. All CSS-only, no external assets.
+    </div>
+    <div class="note" style="margin-bottom: 12px;">
+      <strong>What stays the same:</strong> Hybrid palette, status badge colors, panel frame structure, fonts (DM Sans + JetBrains Mono),
+      keyboard shortcuts, drag-to-resize, navigation history. Phase 2 themes the content inside the panel, not the panel shell.
+    </div>
+    <div class="note">
+      <strong>Accessibility:</strong> All new color combos checked for WCAG AA contrast. No new animations added (existing Pokeball spinner
+      already respects <code>prefers-reduced-motion</code>). Arrow cursor in confirmation box is text-based, not image-based.
+    </div>
+  </div>
+
+  <!-- Tab switching script -->
+  <script>
+    document.querySelectorAll('.variant-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const variant = tab.dataset.variant;
+        document.querySelectorAll('.variant-frame').forEach(f => f.classList.remove('active'));
+        document.getElementById('frame-' + variant).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
