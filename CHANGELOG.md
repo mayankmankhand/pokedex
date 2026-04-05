@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **Git history reset**: Previous commit history taken offline after database credentials were inadvertently included in a configuration file. Credentials rotated.
+- **Documentation accuracy pass**: Fixed phantom issue references (#19-#66) from pre-fork repo, updated stale numbers (45 tools, 47 routes, 381 tests, 10 models, 9 enums), moved shipped features (editable panel, traceability, observability) from V2 to V1 in roadmap
+- **Naming consistency**: Updated titles across ROADMAP, DATABASE, USER-GUIDE, CONTRIBUTING, and AI-PRODUCT-GUIDE from bare "PLM" to "Pokedex PLM"
+- **STATUS-GUIDE updates**: Added reactivation transitions, re-parenting rules, 3 missing audit actions (UPDATE_NOTES, RE_PARENT, REACTIVATE), panel audit source
+- **DATABASE.md updates**: Added 5 missing AuditAction enum values, fixed audit source from "table" to "panel"
+- **Schema comment fix**: Corrected audit source from "table" to "panel" in Prisma schema comment
+
 ## [1.0.0] - 2026-03-31
 
 ### Added

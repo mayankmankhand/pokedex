@@ -1,4 +1,4 @@
-# PLM Database Structure & Seed Data
+# Pokedex PLM Database Structure & Seed Data
 
 ## Entity Relationship
 
@@ -34,7 +34,7 @@ AuditLog
 | ProcedureVersionStatus | `DRAFT`, `APPROVED` |
 | TestCaseStatus | `PENDING`, `PASSED`, `FAILED`, `BLOCKED`, `SKIPPED` |
 | TestCaseResult | `PASS`, `FAIL`, `BLOCKED`, `SKIPPED` |
-| AuditAction | `CREATE`, `UPDATE`, `APPROVE`, `CANCEL`, `SKIP`, `ADD_ATTACHMENT`, `REMOVE_ATTACHMENT`, `CREATE_VERSION`, `RECORD_RESULT` |
+| AuditAction | `CREATE`, `UPDATE`, `APPROVE`, `CANCEL`, `SKIP`, `ADD_ATTACHMENT`, `REMOVE_ATTACHMENT`, `CREATE_VERSION`, `RECORD_RESULT`, `CORRECT_RESULT`, `RE_EXECUTE`, `UPDATE_NOTES`, `RE_PARENT`, `REACTIVATE` |
 | AttachmentStatus | `ACTIVE`, `REMOVED` |
 | AttachmentType | `DOCUMENT`, `IMAGE`, `SPREADSHEET`, `OTHER` |
 
@@ -164,7 +164,7 @@ AuditLog
 | action | AuditAction | |
 | entity_type | String | e.g. "ProductRequirement", "TestCase" |
 | entity_id | String | UUID of the affected entity |
-| source | String | Default: "api" (could be "chat" or "table") |
+| source | String | Default: "api" (could be "chat" or "panel") |
 | request_id | String? | Optional request correlation ID |
 | changes | JSON? | Diff of what changed |
 | created_at | DateTime | Auto-set |
@@ -215,7 +215,7 @@ attachments: { where: ACTIVE_ATTACHMENT_FILTER }
 
 ### Migration Setup
 
-Custom constraints are included in the `full_schema` migration file (`prisma/migrations/20260312120202_full_schema/migration.sql`). Running `prisma migrate deploy` creates a complete database with all constraints - no separate SQL step needed. Resolved in Issue #19.
+Custom constraints are included in the `full_schema` migration file (`prisma/migrations/20260312120202_full_schema/migration.sql`). Running `prisma migrate deploy` creates a complete database with all constraints - no separate SQL step needed.
 
 ---
 

@@ -262,7 +262,7 @@ model AuditLog {
   action     AuditAction
   entityType String      @map("entity_type")
   entityId   String      @map("entity_id")
-  source     String      @default("api") // "api" | "chat" | "table"
+  source     String      @default("api") // "api" | "chat" | "panel"
   requestId  String?     @map("request_id")
   changes    Json?       // JSON diff of what changed
   createdAt  DateTime    @default(now()) @map("created_at")

@@ -8,9 +8,9 @@ How statuses and lifecycle transitions work in the PLM system, and *why* each ru
 |--------|---------|-----------------|-----------|
 | **DRAFT** | Work in progress, not yet finalized | Edit freely, then approve when ready | Allows iteration before committing to a baseline |
 | **APPROVED** | Finalized, structurally locked | Edit title and description (for typo fixes). Create sub-requirements or test procedures against it. Cancel if no longer needed | Locks the baseline so downstream work builds on a stable foundation. Title/description edits are allowed because they don't affect downstream structure |
-| **CANCELED** | No longer relevant | Nothing - this is a terminal state | Preserves history instead of deleting, so audit trail stays intact |
+| **CANCELED** | No longer relevant | Reactivate back to DRAFT if still needed | Preserves history instead of deleting, so audit trail stays intact. Can be reactivated if the cancellation was premature |
 
-**Flow:** DRAFT -> APPROVED -> CANCELED (DRAFT can also be canceled directly)
+**Flow:** DRAFT -> APPROVED -> CANCELED -> DRAFT (via reactivate). DRAFT can also be canceled directly.
 
 **Rules:**
 
@@ -18,9 +18,14 @@ How statuses and lifecycle transitions work in the PLM system, and *why* each ru
 |------|-----------|
 | Sub-requirements can only be approved when their parent product requirement is already approved | Prevents finalizing child work against a requirement that might still change |
 | Approved requirements allow title and description edits only (no structural changes) | Fixes typos without breaking downstream dependencies. All edits are logged in the audit trail |
-| Canceling is permanent and cannot be undone | Prevents flip-flopping that would confuse downstream status tracking |
+| Canceled requirements can be reactivated back to DRAFT | Allows recovery when a cancellation was premature. Requires confirmation |
+| Reactivation cascades to all canceled children (sub-requirements, test procedures, test cases) | Restores the full subtree so you don't have to reactivate each child individually |
+| A child cannot be reactivated until its parent is non-canceled (top-down rule) | Prevents orphaned active children under a canceled parent |
 | DRAFT requirements can be canceled only if they have no children | Prevents orphaning sub-requirements. Clean up children first, then cancel |
 | Canceling an APPROVED requirement cascades to all children | Children lose their purpose when the parent is retired |
+| Sub-requirements can be re-parented to a different product requirement | Allows reorganizing requirements as the project evolves. Children stay attached and their lineage changes transitively |
+| CANCELED sub-requirements cannot be re-parented | A canceled entity should be reactivated first if it needs to move |
+| An APPROVED sub-requirement cannot move to a DRAFT product requirement | The destination parent must be at least as mature as the child to preserve baseline integrity |
 
 ## Test Procedures
 
@@ -31,7 +36,7 @@ Test procedures use **two-entity versioning**: a logical procedure (the containe
 | Status | Meaning | Rationale |
 |--------|---------|-----------|
 | **ACTIVE** | The procedure is in use | Default state - the procedure exists and can hold versions. Title can be edited |
-| **CANCELED** | The procedure is retired | Soft-retirement preserves history while signaling the procedure should not be used |
+| **CANCELED** | The procedure is retired | Soft-retirement preserves history while signaling the procedure should not be used. Can be reactivated to ACTIVE if still needed |
 
 ### Procedure Version (content snapshot)
 
@@ -49,6 +54,9 @@ Test procedures use **two-entity versioning**: a logical procedure (the containe
 | Only one draft version is allowed per procedure at a time | Prevents confusion about which draft is "current" and avoids merge conflicts between parallel edits |
 | Approving a version locks the steps permanently - description can still be edited for typo fixes. To change steps, create a new version | Guarantees test results can always be traced back to the exact steps that were executed |
 | You cannot create versions on a canceled procedure | A retired procedure should not accumulate new work - create a new procedure instead |
+| Canceled procedures can be reactivated to ACTIVE | Allows recovery when a cancellation was premature. Cascade reactivation restores all skipped test cases to PENDING. Requires confirmation |
+| Test procedures can be re-parented to a different sub-requirement | Allows reorganizing test coverage as requirements evolve. Children stay attached and their lineage changes transitively |
+| CANCELED test procedures cannot be re-parented | A canceled entity should be reactivated first if it needs to move |
 
 ## Test Cases
 
@@ -58,7 +66,7 @@ Test procedures use **two-entity versioning**: a logical procedure (the containe
 | **PASSED** | Test executed successfully | Correct result, update notes | Records a positive result against the procedure version. Not fully terminal - result can be corrected if recorded wrong, and notes can be updated |
 | **FAILED** | Test found a defect | Correct result, re-execute, update notes | Flags the defect for follow-up. Can be corrected if the wrong result was recorded, or re-executed (reset to PENDING) after a fix |
 | **BLOCKED** | Cannot execute due to external dependency | Record a result when unblocked, correct result, re-execute, update notes | Distinguishes "can't test yet" from "chose not to test" (SKIPPED). Can also be corrected or re-executed |
-| **SKIPPED** | Intentionally not executed | Cannot record results, but attachments can still be added | Permanent opt-out so skipped tests don't show up as incomplete work |
+| **SKIPPED** | Intentionally not executed | Cannot record results, but attachments can still be added. Can be reactivated to PENDING | Opt-out so skipped tests don't show up as incomplete work. Can be reactivated if the skip was premature |
 
 **Rules:**
 
@@ -68,8 +76,8 @@ Test procedures use **two-entity versioning**: a logical procedure (the containe
 | Recording a result (PASS/FAIL/BLOCKED) changes the status automatically | Keeps status in sync with the actual outcome - no manual status management needed |
 | Recording a SKIPPED result returns the test case to PENDING | Temporary deferment ("not right now") vs. the permanent `skipTestCase` action ("never running this") |
 | Results can only be recorded when the parent procedure version is APPROVED | Same reason as creation - results must trace back to a locked set of steps |
-| Skipping a test case is permanent | Prevents gaming metrics by skipping failures and then un-skipping later |
-| You cannot record results on a skipped test case | Once a test is opted out, its status should not change - create a new test case if needed |
+| Skipped test cases can be reactivated to PENDING | Allows recovery when a skip was premature. Requires confirmation |
+| You cannot record results on a skipped test case | Reactivate it first if you need to run it |
 | BLOCKED is re-executable (not terminal) | A blocked test should eventually be run once the blocker is resolved |
 | Results on PASSED, FAILED, and BLOCKED test cases can be corrected | Mistakes happen - recording the wrong result should not require creating a new test case |
 | FAILED and BLOCKED test cases can be re-executed (reset to PENDING) | After fixing a defect or resolving a blocker, re-running the same test case keeps history cleaner than creating a new one |
@@ -87,7 +95,7 @@ PASSED, FAILED, and BLOCKED test cases are not fully terminal. Three recovery op
 
 **Why not PASSED for re-execute?** A passing test does not need re-execution. If the result was wrong, use "correct result" instead.
 
-**Why not SKIPPED?** SKIPPED is a permanent opt-out. Recovery operations do not apply. If you need to run a skipped test, create a new test case.
+**Why not SKIPPED?** SKIPPED is an opt-out, not a test execution outcome. Recovery operations (correct, re-execute, update notes) do not apply. To run a skipped test, reactivate it first to return it to PENDING.
 
 ### Result vs Status Mapping
 
@@ -127,6 +135,9 @@ When a parent entity is canceled, its children are automatically canceled or ski
 | Product Requirement is canceled | All its Sub-Requirements | CANCELED | Sub-requirements lose their purpose when the parent requirement is retired |
 | Sub-Requirement is canceled | All its Test Procedures | CANCELED | Test procedures can't validate a canceled requirement |
 | Test Procedure is canceled | All its Test Cases | SKIPPED | Test cases can't be executed against a retired procedure - SKIPPED (not CANCELED) because test cases don't have a CANCELED status |
+| Product Requirement is reactivated | All its canceled Sub-Requirements, their canceled Test Procedures, and their skipped Test Cases | DRAFT (PR/SR), ACTIVE (TP), PENDING (TC) | Restores the full subtree so the requirement is usable again |
+| Sub-Requirement is reactivated | All its canceled Test Procedures and their skipped Test Cases | ACTIVE (TP), PENDING (TC) | Same as above, scoped to one sub-requirement |
+| Test Procedure is reactivated | All its skipped Test Cases | PENDING | Restores test cases so the procedure can be tested again |
 
 **How cascades work:**
 - Cascades skip children that are already in the target terminal state (no duplicate operations)
@@ -148,7 +159,7 @@ The service layer enforces lifecycle rules, but the database provides a second l
 
 Destructive or hard-to-reverse actions require explicit user confirmation before execution. This applies to both the API (via Zod validation) and the AI chat assistant (via prompt engineering).
 
-**Actions that require confirmation:** approve, cancel, skip, remove attachment, correct result, re-execute
+**Actions that require confirmation:** approve, cancel, skip, remove attachment, correct result, re-execute, reactivate, re-parent
 
 **How it works:**
 1. The user requests an action (e.g., "cancel this requirement")
@@ -156,7 +167,7 @@ Destructive or hard-to-reverse actions require explicit user confirmation before
 3. The user explicitly confirms (e.g., "yes", "go ahead")
 4. Only then is the action executed with the confirmation flag set to `true`
 
-**Why:** These actions are either irreversible (cancel, skip) or lock content permanently (approve). The confirmation step prevents accidental data loss, especially important when cascade effects would cancel multiple child entities.
+**Why:** These actions either lock content permanently (approve), have cascade effects (cancel, reactivate), or reorganize entity relationships (re-parent). The confirmation step prevents accidental data loss, especially important when cascade effects would affect multiple child entities.
 
 ## Audit Actions
 
@@ -175,5 +186,8 @@ Every change in the system is logged in the same database transaction as the cha
 | RE_EXECUTE | A failed or blocked test case is reset to PENDING | Test Cases | Records that execution data was cleared for a re-run |
 | ADD_ATTACHMENT | A file is attached to an entity | Attachments | Records file additions with metadata |
 | REMOVE_ATTACHMENT | A file attachment is removed (soft-deleted) | Attachments | Records who removed the file and when |
+| UPDATE_NOTES | Notes on an executed test case are added or edited | Test Cases | Tracks note changes separately from result changes |
+| RE_PARENT | An entity is moved to a different parent | Sub-Requirements, Test Procedures | Records the old and new parent so lineage changes are traceable |
+| REACTIVATE | A canceled or skipped entity is restored | Requirements, Sub-Requirements, Test Procedures, Test Cases | Records the recovery decision, including any cascade reactivation of children |
 
-**Source tracking:** Each audit entry records whether the action came from the API (`"api"`) or the AI chat assistant (`"chat"`), so you can distinguish human-initiated actions from AI-assisted ones.
+**Source tracking:** Each audit entry records whether the action came from the API (`"api"`), the AI chat assistant (`"chat"`), or the interactive panel (`"panel"`, set via `X-Audit-Source` header), so you can distinguish how each action was triggered.

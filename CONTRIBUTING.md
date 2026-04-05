@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in PLM. Here is how to get involved.
+Thanks for your interest in Pokedex PLM. Here is how to get involved.
 
 ## Setup
 
@@ -21,7 +21,7 @@ Use [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) to report 
 ## Submitting Pull Requests
 
 - One branch per issue.
-- Run `npm run test` before opening a PR. All 229 tests should pass.
+- Run `npm run test` before opening a PR. All 381 tests should pass.
 - Run `npm run lint` to check for style issues.
 - Keep PRs focused. If your change touches multiple concerns, split it into separate PRs.
 

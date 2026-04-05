@@ -1,11 +1,11 @@
-# PLM - Product Lifecycle Management
+# Pokedex PLM - Product Lifecycle Management
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-pokedex--plm.vercel.app-teal)](https://pokedex-plm.vercel.app) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Tests](https://img.shields.io/badge/Tests-229_passing-brightgreen)]()
+[![Live Demo](https://img.shields.io/badge/Live_Demo-pokedex--plm.vercel.app-teal)](https://pokedex-plm.vercel.app) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Tests](https://img.shields.io/badge/Tests-381_passing-brightgreen)]()
 
 A chat-based tool for managing product requirements, test procedures, and test cases. Instead of clicking through menus and forms, you just type what you need and the AI handles the rest.
 
 <!-- TODO: Add hero screenshot once docs/images/hero-screenshot.png exists -->
-<!-- ![PLM Chat Interface](docs/images/hero-screenshot.png) -->
+<!-- ![Pokedex PLM Chat Interface](docs/images/hero-screenshot.png) -->
 
 ## Why This Exists
 
@@ -48,10 +48,9 @@ PLM replaces all of that with a chat interface. You type "create a requirement f
 
 ## What's Missing (Known Limitations)
 
-- **No real authentication** - 7 demo users (Pokemon characters) are hardcoded. You pick a user from a dropdown. Real sign-in with email/password or OAuth is planned ([#62](https://github.com/mayankmankhand/pokedex/issues/62)).
-- **No permissions** - All users see all data and can do everything. Role-based access control (admin, editor, commenter) scoped by team is planned ([#63](https://github.com/mayankmankhand/pokedex/issues/63)).
+- **No real authentication** - 7 demo users (Pokemon characters) are hardcoded. You pick a user from a dropdown. Real sign-in with email/password or OAuth is planned.
+- **No permissions** - All users see all data and can do everything. Role-based access control (admin, editor, commenter) scoped by team is planned.
 - **No file attachments** - The data model supports attachments, but there's no upload UI. We could add support for Z drive links or file uploads - worth discussing.
-- **No real-time panel editing** - You can view entity details in the side panel, but can't edit directly in the panel. Changes go through the chat. Low priority.
 
 ## Demo Users
 
@@ -69,16 +68,14 @@ The app ships with a Pokedex hardware PLM dataset and 7 demo users. Switch users
 
 ## What's Coming
 
-- **User authentication** - Sign in with email/password or OAuth, replacing the demo user picker ([#62](https://github.com/mayankmankhand/pokedex/issues/62))
-- **Role-based permissions** - Admin, editor, and commenter roles scoped by team ([#63](https://github.com/mayankmankhand/pokedex/issues/63))
-- **Team data isolation** - Scope queries so users only see their team's data ([#32](https://github.com/mayankmankhand/pokedex/issues/32))
-- **AI observability** - Structured logging and tracing for model inputs, outputs, and decisions ([#64](https://github.com/mayankmankhand/pokedex/issues/64))
-- **AI evals** - Automated tests for AI response quality and recurring error detection ([#65](https://github.com/mayankmankhand/pokedex/issues/65))
-- **AI maintenance** - Plan for model upgrades, prompt tuning, and data drift ([#66](https://github.com/mayankmankhand/pokedex/issues/66))
+- **User authentication** - Sign in with email/password or OAuth, replacing the demo user picker
+- **Role-based permissions** - Admin, editor, and commenter roles scoped by team
+- **Team data isolation** - Scope queries so users only see their team's data
+- **AI evals** - Automated tests for AI response quality and recurring error detection
+- **AI maintenance** - Plan for model upgrades, prompt tuning, and data drift
 - **Frontend resilience** - Error boundaries and retry logic
 - **Human-readable IDs** - Short IDs instead of UUIDs (e.g., PR-001)
 - **Document parsing** - Upload PDFs or Word docs and extract requirements automatically
-- **Interactive panel** - Click table rows to navigate, edit entities directly in the panel
 
 ## Journey
 
@@ -96,12 +93,12 @@ This project started as a learning exercise and grew into a working system acros
 
 - **Framework**: Next.js 16 (App Router, TypeScript)
 - **Database**: Neon PostgreSQL via Prisma ORM
-- **AI**: Vercel AI SDK v6 + Anthropic Claude (streaming chat with 41 LLM tools)
+- **AI**: Vercel AI SDK v6 + Anthropic Claude (streaming chat with 45 LLM tools)
 - **UI**: Tailwind CSS v4, Zustand, react-markdown, lucide-react, mermaid
 - **Validation**: Zod schemas (shared between API routes and LLM tools)
 - **Testing**: Vitest (isolated test database)
 - **Auth**: Demo users via Edge Middleware (V1)
-- **Security**: Rate limiting (chat endpoint, kill switch via env var), security headers, HTML stripping, UUID validation, generic error responses (no DB detail leakage), robots.txt
+- **Security**: Rate limiting (chat endpoint, kill switch via env var), session-based demo limit (HMAC-SHA256 signed cookie), security headers, HTML stripping, UUID validation, generic error responses (no DB detail leakage), robots.txt
 
 ### Quick Start
 
@@ -153,14 +150,14 @@ ProductRequirement (org-wide)
 POST /api/chat   # Streaming natural language interface to manage PLM entities
 ```
 
-Send `{ messages: [{ role, content }] }` with `x-demo-user-id` header. Returns a Vercel AI SDK stream. The LLM has 45 tools (24 mutation, 5 read, 4 query, 8 UI intent, 2 attachment, 2 reserved) and confirms before destructive actions.
+Send `{ messages: [{ role, content }] }` with `x-demo-user-id` header. Returns a Vercel AI SDK stream. The LLM has 45 tools (28 mutation, 5 read, 4 query, 8 UI intent) and confirms before destructive actions.
 
 ### Scripts
 
 ```bash
 npm run dev          # Start dev server
 npm run build        # Production build
-npm run test         # Run tests (229 tests, uses .env.test database)
+npm run test         # Run tests (381 tests, uses .env.test database)
 npm run test:watch   # Watch mode
 npm run lint         # ESLint
 ```
@@ -170,10 +167,10 @@ npm run lint         # ESLint
 ```
 src/
   app/               # Next.js pages + API routes
-    api/             # 38 route handlers (domain commands + queries + chat)
+    api/             # 47 route handlers (domain commands + queries + chat)
     page.tsx         # Chat UI (dual-panel, streaming)
     globals.css      # Tailwind v4 + design tokens
-  components/chat/   # Chat UI components (8 files)
+  components/chat/   # Chat UI components (10 files)
   components/panel/  # Context panel views (detail, table, diagram, audit, error)
   hooks/             # Shared React hooks (useDesktopBreakpoint)
   stores/            # Zustand stores (panel state + width)
@@ -184,7 +181,7 @@ src/
   services/          # Business logic with lifecycle enforcement + audit logging
   __tests__/         # Vitest tests (lifecycle, schema, integration, panel)
 prisma/
-  schema.prisma      # Database schema (9 models, 7 enums)
+  schema.prisma      # Database schema (10 models, 9 enums)
   seed.ts            # Demo data seeder
 docs/
   DATABASE.md        # Schema documentation and seed data
@@ -206,4 +203,4 @@ docs/
 
 ## Issue Log
 
-49 issues tracked. 36 completed, 3 open, 10 planned. See [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) for the full list.
+16 issues tracked. 15 completed, 1 open. See [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) for the full list.

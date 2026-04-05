@@ -16,7 +16,9 @@ The confirm-before-act pattern was simple but important: the system prompt tells
 
 ### Phase 3: Making It Look Right
 
-The UI went through two major redesigns. The first version looked dated - it worked but nobody would want to use it. The fix was to stop guessing at design and start with a spec: research real products, pick explicit colors and fonts, define spacing rules. That redesign used a slate+teal palette with frosted glass surfaces, DM Sans for text, and a resizable side panel for rich context views.
+The UI went through several redesigns. The first version looked dated - it worked but nobody would want to use it. The fix was to stop guessing at design and start with a spec: research real products, pick explicit colors and fonts, define spacing rules. The initial redesign used a slate+teal palette with frosted glass surfaces, but the design kept evolving from there.
+
+The Pokemon Indigo League theme replaced slate+teal entirely - a warm parchment palette (#F5F0EA background, #DC2626 Pokemon Red primary, #3D7DCA accent blue), DM Sans + JetBrains Mono fonts, and solid opaque surfaces with thick borders instead of frosted glass. The guiding principle became "chrome bold, data restrained" - full-saturation color on small accents like buttons and badges, muted parchment on large surfaces. Later phases added panel primitives (Framed Dex Entry cards, styled data tables), then animations and branding (bouncing Pokeball streaming dots, iris wipe transitions, trainer identity system with sprite avatars). Each phase built on the same design language rather than replacing it.
 
 One lesson learned the hard way: a global CSS reset (`* { margin: 0; padding: 0 }`) was silently breaking every Tailwind spacing utility. Removing two lines of CSS fixed dozens of layout issues.
 

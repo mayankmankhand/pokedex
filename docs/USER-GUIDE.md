@@ -1,6 +1,6 @@
-# PLM User Guide
+# Pokedex PLM User Guide
 
-PLM is a chat-driven tool for managing product requirements, test procedures, and test results. Ask questions in plain English and the assistant handles the rest.
+Pokedex PLM is a chat-driven tool for managing product requirements, test procedures, and test results. Ask questions in plain English and the assistant handles the rest.
 
 ---
 
@@ -130,7 +130,7 @@ Each entity type follows a specific lifecycle:
 - **Product Requirements and Sub-Requirements**: Draft -> Approved -> Canceled. Draft items can also be canceled directly (if they have no children).
 - **Test Procedures**: Active -> Canceled
 - **Test Procedure Versions**: Draft -> Approved (locked permanently). To revise an approved version, create a new draft version.
-- **Test Cases**: Pending -> Passed / Failed / Blocked / Skipped. Skipped is permanent and cannot be undone.
+- **Test Cases**: Pending -> Passed / Failed / Blocked / Skipped. Skipped test cases can be restored when a parent entity is reactivated (cascade reactivation).
 
 **Key rules:**
 - A sub-requirement can only be approved if its parent product requirement is already approved.
