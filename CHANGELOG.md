@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-16
+
 ### Changed
 - **Documentation refresh** (#18): Restructured README as a story-first front door (tagline, hero screenshot, "Why I built this," "Lessons learned with receipts," "How this was built," "Design decisions you can poke at," fenced "For Developers" section). Rewrote CLAUDE.md into a tight project profile with a Design Decisions table, Design Principles ("Chrome bold, data restrained"), Anti-patterns, and explicit v1/v2/v3/Not Planned scope sections. Added [AGENT-SETUP.md](AGENT-SETUP.md) for AI-agent-assisted setup. Light drift audit on USER-GUIDE, AI-PRODUCT-GUIDE, DATABASE (added TraceEvent model, choice buttons, trainer sprites, edit mode toggle, lifecycle action buttons, panel pagination). Added `docs/images/hero.png`.
 - **Git history reset**: Previous commit history taken offline after database credentials were inadvertently included in a configuration file. Credentials rotated.
