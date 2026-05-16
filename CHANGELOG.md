@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+- **Documentation refresh** (#18): Restructured README as a story-first front door (tagline, hero screenshot, "Why I built this," "Lessons learned with receipts," "How this was built," "Design decisions you can poke at," fenced "For Developers" section). Rewrote CLAUDE.md into a tight project profile with a Design Decisions table, Design Principles ("Chrome bold, data restrained"), Anti-patterns, and explicit v1/v2/v3/Not Planned scope sections. Added [AGENT-SETUP.md](AGENT-SETUP.md) for AI-agent-assisted setup. Light drift audit on USER-GUIDE, AI-PRODUCT-GUIDE, DATABASE (added TraceEvent model, choice buttons, trainer sprites, edit mode toggle, lifecycle action buttons, panel pagination). Added `docs/images/hero.png`.
 - **Git history reset**: Previous commit history taken offline after database credentials were inadvertently included in a configuration file. Credentials rotated.
 - **Documentation accuracy pass**: Fixed phantom issue references (#19-#66) from pre-fork repo, updated stale numbers (45 tools, 47 routes, 381 tests, 10 models, 9 enums), moved shipped features (editable panel, traceability, observability) from V2 to V1 in roadmap
 - **Naming consistency**: Updated titles across ROADMAP, DATABASE, USER-GUIDE, CONTRIBUTING, and AI-PRODUCT-GUIDE from bare "PLM" to "Pokedex PLM"

@@ -7,9 +7,10 @@ Pokedex PLM is a chat-driven tool for managing product requirements, test proced
 ## Quick Start
 
 - Open the app in your browser.
-- Pick a user from the dropdown in the top bar (any of the 7 demo users).
+- Pick a user from the dropdown in the top bar (any of the 7 demo users). Each demo user has a fan-inspired trainer sprite and accent color that shows up on their chat messages.
 - Type a question or command in the chat input at the bottom.
 - Results appear in the chat and in the context panel on the right.
+- When the assistant asks a multi-choice question, click one of the inline choice buttons below the message instead of typing a reply.
 
 ---
 
@@ -93,10 +94,10 @@ Editing works in most states. Draft entities allow full edits. Approved requirem
 
 The panel on the right side of the screen displays structured data that the assistant generates. It shows four types of content:
 
-- **Detail views** - A single entity with all its fields and related items.
-- **Data tables** - Lists, gap analysis, and coverage reports. Tables show up to 15 rows, with a truncation indicator if there are more results.
-- **Mermaid diagrams** - Traceability trees and status flows. Use the zoom controls (+, -, Fit) to navigate large diagrams.
-- **Audit logs** - Change history with before/after values for each field.
+- **Detail views** - A single entity with all its fields and related items. Click the **Edit** button to toggle inline editing on text fields the system allows you to change (the assistant decides what's editable based on lifecycle rules). Click action buttons like **Approve**, **Cancel**, **Reactivate**, **Skip**, or **Re-execute** to perform lifecycle actions without typing in chat. The assistant is told about your panel actions through a system note so it stays in sync.
+- **Data tables** - Lists, gap analysis, and coverage reports. Tables show up to 15 rows. When more results exist, a **Show more** button loads the next page. Click any row with an ID to drill into that entity in the panel.
+- **Mermaid diagrams** - Traceability trees and status flows. Use the zoom controls (+, -, Fit) to navigate large diagrams, and **Copy source** to copy the Mermaid markup.
+- **Audit logs** - Change history with before/after values for each field. Each entry is tagged with where the change came from (chat, panel, or API).
 
 ### Panel controls
 
@@ -104,12 +105,13 @@ The panel on the right side of the screen displays structured data that the assi
 - **Cmd+K** - Focus the chat input.
 - **Cmd+\\** - Toggle the panel open/closed.
 - **Escape** - Close the panel.
+- When the panel opens, an iris-wipe transition expands the new content from the center. The animation respects `prefers-reduced-motion` and is skipped if you have reduced motion turned on.
 
 ---
 
 ## Demo Users
 
-Pick any user from the dropdown. All demo users have the "engineer" role. Your choice determines who appears as the creator or actor in audit logs and entity records.
+Pick any user from the dropdown in the top right. The picker is a custom listbox that shows each user's trainer sprite next to their name; you can also navigate it from the keyboard. The selected trainer's sprite appears on your messages in the chat. All demo users have the "engineer" role. Your choice determines who appears as the creator or actor in audit logs and entity records.
 
 | Name | Team |
 |------|------|

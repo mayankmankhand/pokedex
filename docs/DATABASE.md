@@ -21,6 +21,9 @@ Attachment (Exclusive Arc - exactly one parent FK is non-null)
 
 AuditLog
  └── User (actor)
+
+TraceEvent (observability, 7-day retention)
+ └── sessionId (from demo_session_id cookie)
 ```
 
 ---
@@ -37,6 +40,7 @@ AuditLog
 | AuditAction | `CREATE`, `UPDATE`, `APPROVE`, `CANCEL`, `SKIP`, `ADD_ATTACHMENT`, `REMOVE_ATTACHMENT`, `CREATE_VERSION`, `RECORD_RESULT`, `CORRECT_RESULT`, `RE_EXECUTE`, `UPDATE_NOTES`, `RE_PARENT`, `REACTIVATE` |
 | AttachmentStatus | `ACTIVE`, `REMOVED` |
 | AttachmentType | `DOCUMENT`, `IMAGE`, `SPREADSHEET`, `OTHER` |
+| TraceEventType | `USER_MESSAGE`, `AI_RESPONSE`, `TOOL_CALL`, `TOOL_RESULT`, `PANEL_ACTION`, `API_CALL`, `ERROR` |
 
 ---
 
@@ -164,12 +168,29 @@ AuditLog
 | action | AuditAction | |
 | entity_type | String | e.g. "ProductRequirement", "TestCase" |
 | entity_id | String | UUID of the affected entity |
-| source | String | Default: "api" (could be "chat" or "panel") |
+| source | String | Default: "api". Other values: "chat" (AI chat route override) and "panel" (set via `X-Audit-Source` header from panel mutations). |
 | request_id | String? | Optional request correlation ID |
 | changes | JSON? | Diff of what changed |
 | created_at | DateTime | Auto-set |
 
 **Indexes**: (entity_type, entity_id), (actor_id), (created_at)
+
+### TraceEvent
+
+Observability data captured per request for session debugging. Not audit-grade - deferred writes are best-effort and intermediate events may be lost. 7-day retention via a Vercel cron job.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID (PK) | Auto-generated |
+| session_id | String | Browser session ID from the `demo_session_id` cookie (UUID, 24h expiry, parsed in Edge Middleware) |
+| event_type | TraceEventType | One of 7 event types |
+| payload | JSON | Typed per event type. See [trace.service.ts](../src/services/trace.service.ts). Deep-truncated at 2000 chars per string |
+| request_id | String? | Optional request correlation ID |
+| sequence_number | Int | Default: 0. Orders events within a request |
+| source | String? | "api", "chat", or "panel" |
+| created_at | DateTime | Auto-set |
+
+**Indexes**: (session_id, created_at), (created_at)
 
 ---
 

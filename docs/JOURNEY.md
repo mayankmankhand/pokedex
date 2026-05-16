@@ -36,7 +36,7 @@ Each of these features built on the patterns established in Phase 1 - domain com
 
 ### Phase 6: Testing and Validation
 
-The system started with 161 automated tests (now 229) covering lifecycle transitions, schema validation, service logic, and panel payloads, all running against an isolated test database. Beyond automated tests, real-life scenario tests walk through multi-user workflows end to end - multiple users creating, approving, canceling, recovering, and re-parenting entities across teams. A headless browser QA setup captures screenshots and checks that the UI actually renders what the code says it should. Manual database integration walkthroughs verify the full stack from chat input to database state.
+The system started with 161 automated tests and now has several hundred, covering lifecycle transitions, schema validation, service logic, and panel payloads, all running against an isolated test database. Beyond automated tests, real-life scenario tests walk through multi-user workflows end to end - multiple users creating, approving, canceling, recovering, and re-parenting entities across teams. A headless browser QA setup captures screenshots and checks that the UI actually renders what the code says it should. Manual database integration walkthroughs verify the full stack from chat input to database state.
 
 ### Key Decisions That Shaped the System
 

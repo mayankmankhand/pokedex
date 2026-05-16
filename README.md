@@ -1,58 +1,67 @@
-# Pokedex PLM - Product Lifecycle Management
+# Pokedex PLM
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-pokedex--plm.vercel.app-teal)](https://pokedex-plm.vercel.app) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Tests](https://img.shields.io/badge/Tests-381_passing-brightgreen)]()
+[![Live Demo](https://img.shields.io/badge/Live_Demo-pokedex--plm.vercel.app-teal)](https://pokedex-plm.vercel.app) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)]()
 
-A chat-based tool for managing product requirements, test procedures, and test cases. Instead of clicking through menus and forms, you just type what you need and the AI handles the rest.
+A chat-based Product Lifecycle Management app. Type what you need; the AI proposes the change; you confirm before anything is written.
 
-<!-- TODO: Add hero screenshot once docs/images/hero-screenshot.png exists -->
-<!-- ![Pokedex PLM Chat Interface](docs/images/hero-screenshot.png) -->
+![Pokedex PLM: chat on the left walking through a Pokemon Scanner traceability query, context panel on the right rendering the requirement-to-test-case Mermaid diagram](docs/images/hero.png)
 
-## Why This Exists
+## Why I built this
 
-The biggest pain with traditional lifecycle management tools is the clicking. Creating a requirement, approving it, writing test procedures, recording results - every action means navigating through multiple screens. Nobody wants to do it, and things fall behind.
+I'm a PM who has spent more hours than I'd like clicking through PLM tools. Creating a requirement, approving it, writing a test procedure, recording results - every action means navigating multiple screens, and things fall behind because nobody wants to do it. I wanted to see if a chat interface could carry that whole workflow.
 
-PLM replaces all of that with a chat interface. You type "create a requirement for pokemon scanner testing" and it does it. You type "what did Brock work on last week?" and it pulls from the audit log. You get up-to-date context in 25 seconds instead of clicking through 10 screens.
+So I built the version of PLM I wished I had. You type "create a requirement for pokemon scanner testing" or "what did Brock work on last week?" and the AI handles the lifecycle command, pulls from the audit log, or renders a traceability diagram in the panel beside the chat. The bet is that chat plus a structured context panel beats click-driven forms for the daily PM workflow.
 
-**Nothing gets updated without your confirmation.** Every change the AI proposes, you approve first. The idea is to build trust in this model and eventually move toward more automation - like parsing test procedures and generating test cases automatically.
+The trust principle is the one rule I refused to break: **nothing is updated without my confirmation.** Every destructive action the AI proposes (create, cancel, re-parent, reactivate, correct a result) waits for an explicit yes. The goal is to build trust in the model first, then layer in more automation later (auto-parsing test procedures, generating test cases from specs). Without that confirmation gate, chat-driven PLM is a bug factory.
 
-### Why it's worth considering
+## What it does
 
-1. **Customizable** - The lifecycle rules are your rules. Change them whenever you need to. No vendor lock-in.
-2. **No training needed** - Users just type. Even someone from production can update a test case or procedure without learning a new interface.
+- **AI chat with confirm-before-act.** Claude (via Vercel AI SDK v6) drives 45 tools across mutations, queries, and UI intents. Every destructive call requires a `confirmed: true` field, enforced at the schema level - the AI literally cannot bypass it.
+- **Interactive context panel.** Detail views (Framed Dex Entry cards, inline editing, lifecycle action buttons), data tables (10 query types with cross-entity columns), Mermaid traceability/status/coverage diagrams, and a filterable audit log - all driven by the AI via UI intent tools.
+- **Full lifecycle management.** Draft -> Approved -> Canceled with enforced transitions. Cascade cancel and reactivate. Re-parent sub-requirements and test procedures. Recovery operations for executed test cases (correct wrong result, re-execute failed, update notes). Every transition audited.
+- **Audit, traceability, and observability.** Every mutation logged with actor, source (chat vs panel vs api), and change details inside the same Prisma transaction. Database-backed session tracing (`TraceEvent` model, 7 event types) for AI observability, viewable at `/admin/traces`.
 
-## What's Built
+## Who this is for
 
-### Core System
-- Full entity hierarchy: Product Requirements, Sub-Requirements, Test Procedures (with versioning), and Test Cases
-- PostgreSQL database with lifecycle enforcement, audit logging, and data integrity constraints
-- Domain command API (not generic CRUD) - each endpoint maps to one business action
+A PM or PMM learning to build AI products and curious how a chat-first surface plays against a structured backend. Engineers evaluating AI orchestration patterns (service-layer tool calls, confirm-before-act, panel-as-tool-output) will find a working reference. Honestly, this is a demo and learning vehicle, not a production product - I built it to learn, the seed data is Pokemon-themed, and the auth is hardcoded.
 
-### AI Chat Interface
-- Natural language interface powered by Claude (45 tools for creating, updating, querying, and managing entities)
-- Confirm-before-act on all destructive operations (cancel, re-parent, reactivate, correct results)
-- Context panel that shows entity details, data tables, traceability diagrams, and audit logs
-- Drag-to-resize panel, keyboard shortcuts (Cmd+K to focus, Cmd+\ to toggle panel)
+## Try the demo
 
-### Lifecycle Management
-- Full status lifecycle: Draft, Active, Approved, Canceled, with enforced transition rules
-- Edit controls: Draft entities fully editable, Approved entities allow limited edits (audited)
-- Cancel with cascade (children get canceled too), reactivate with cascade (children come back)
-- Re-parent: move sub-requirements or test procedures to a different parent
-- Test case recovery: correct wrong results, re-execute failed tests, update notes
+Live at [pokedex-plm.vercel.app](https://pokedex-plm.vercel.app). Pick one of the 7 Pokemon demo users from the dropdown, then try:
 
-### Audit & Traceability
-- Every mutation logged with user, timestamp, source (chat vs API), and change details
-- AI can summarize audit activity ("what did Jessie do this week?")
-- Mermaid traceability diagrams generated on demand
-- Cross-entity queries: coverage by team, test result summaries, gap analysis
+- "Show me the details for Pokemon Scanner Module"
+- "What did Brock work on last week?"
+- "Show me a traceability diagram for the Power System requirement"
 
-## What's Missing (Known Limitations)
+## What's missing (known limitations)
 
 - **No real authentication** - 7 demo users (Pokemon characters) are hardcoded. You pick a user from a dropdown. Real sign-in with email/password or OAuth is planned.
 - **No permissions** - All users see all data and can do everything. Role-based access control (admin, editor, commenter) scoped by team is planned.
 - **No file attachments** - The data model supports attachments, but there's no upload UI. We could add support for Z drive links or file uploads - worth discussing.
 
-## Demo Users
+## Lessons learned (with receipts)
+
+Three lessons worth pulling forward from the build:
+
+- **Two lines of CSS quietly broke every Tailwind spacing utility.** A global reset (`* { margin: 0; padding: 0 }`) was overriding every margin and padding class in the app. Deleting it fixed dozens of layout issues at once. Receipt: [Phase 3 of JOURNEY.md](docs/JOURNEY.md#phase-3-making-it-look-right).
+- **Mermaid diagrams went text-blind when sanitized.** DOMPurify was stripping the SVG elements Mermaid uses for labels. The fix was `ADD_TAGS: ["foreignObject", "style"]` so the sanitizer keeps the structural pieces but still strips scripts. Receipt: see the `Security` notes in [CLAUDE.md](CLAUDE.md).
+- **Spec first, then design.** The first UI was a slate+teal frosted-glass mess that I kept "tweaking." The redesign that stuck (warm Pokemon Indigo League parchment, solid surfaces, thick borders, "chrome bold, data restrained") came from writing an explicit spec - hex values, fonts, spacing rules - before opening the editor. Receipt: [Phase 3 of JOURNEY.md](docs/JOURNEY.md#phase-3-making-it-look-right).
+
+## How this was built
+
+Six phases (foundation, AI layer, UI design, hardening, lifecycle operations, testing), each shaped by an explicit explore -> plan -> execute -> review discipline using a Claude Code slash command toolkit. Every feature started with `/explore`, got a written plan via `/create-plan`, was built with `/execute`, and reviewed with `/review-*` before merging. The phase-by-phase build story (and the design lessons behind each phase) lives in [JOURNEY.md](docs/JOURNEY.md).
+
+## Design decisions you can poke at
+
+Receipts for the judgment calls behind this app:
+
+- The Pokemon Indigo League design system and rationale: [CLAUDE.md](CLAUDE.md) Design Decisions section.
+- Phase-by-phase build story and what each phase taught me: [docs/JOURNEY.md](docs/JOURNEY.md).
+- AI product structure (context, orchestration, observability, evals): [docs/AI-PRODUCT-GUIDE.md](docs/AI-PRODUCT-GUIDE.md).
+- Roadmap and explicitly-rejected items (no BOM, no ECO, no dashboards): [ROADMAP.md](ROADMAP.md).
+- Design HTML prototypes from the redesign phases: [design-concept.html](design-concept.html), [design-concept-phase2.html](design-concept-phase2.html).
+
+## Demo users
 
 The app ships with a Pokedex hardware PLM dataset and 7 demo users. Switch users from the dropdown in the top-right corner.
 
@@ -66,30 +75,23 @@ The app ships with a Pokedex hardware PLM dataset and 7 demo users. Switch users
 | Jessie Rocket | Team Rocket QA |
 | James Rocket | Team Rocket QA |
 
-## What's Coming
+## What's coming
 
-- **User authentication** - Sign in with email/password or OAuth, replacing the demo user picker
-- **Role-based permissions** - Admin, editor, and commenter roles scoped by team
-- **Team data isolation** - Scope queries so users only see their team's data
-- **AI evals** - Automated tests for AI response quality and recurring error detection
-- **AI maintenance** - Plan for model upgrades, prompt tuning, and data drift
-- **Frontend resilience** - Error boundaries and retry logic
-- **Human-readable IDs** - Short IDs instead of UUIDs (e.g., PR-001)
-- **Document parsing** - Upload PDFs or Word docs and extract requirements automatically
+- **User authentication and role-based permissions** - Real sign-in, plus admin/editor/commenter roles scoped by team.
+- **Document parsing** - Upload PDFs or Word docs and extract requirements automatically.
+- **AI evals and maintenance plan** - Automated quality checks for AI responses, plus a strategy for model upgrades and prompt tuning.
+- **Configurable approval chains** - Multi-step, multi-role sign-off workflows (V3).
+- **Baseline snapshots and CAPA** - Point-in-time milestone snapshots and a quality management workflow (V3).
 
-## Journey
-
-This project started as a learning exercise and grew into a working system across 6 phases: foundation, AI layer, UI design, hardening, lifecycle operations, and testing. See the full build story and key architectural decisions in [JOURNEY.md](docs/JOURNEY.md).
-
----
-
-> For a deeper look at how the AI layer is structured (context engineering, orchestration, observability, and evals), see [AI-PRODUCT-GUIDE.md](docs/AI-PRODUCT-GUIDE.md).
+Full picture in [ROADMAP.md](ROADMAP.md).
 
 ---
 
 ## For Developers
 
-### Tech Stack
+### Tech stack
+
+Next.js 16 + TypeScript + Prisma + Neon Postgres + Vercel AI SDK v6 + Anthropic Claude, with Tailwind v4 and Zustand on the front end.
 
 - **Framework**: Next.js 16 (App Router, TypeScript)
 - **Database**: Neon PostgreSQL via Prisma ORM
@@ -100,7 +102,7 @@ This project started as a learning exercise and grew into a working system acros
 - **Auth**: Demo users via Edge Middleware (V1)
 - **Security**: Rate limiting (chat endpoint, kill switch via env var), session-based demo limit (HMAC-SHA256 signed cookie), security headers, HTML stripping, UUID validation, generic error responses (no DB detail leakage), robots.txt
 
-### Quick Start
+### Quick start
 
 ```bash
 # Install dependencies
@@ -122,7 +124,7 @@ npx prisma db seed
 npm run dev
 ```
 
-### API Design
+### API design
 
 The API uses **domain commands** instead of raw CRUD. Each endpoint maps to one business action:
 
@@ -134,7 +136,7 @@ GET  /api/product-requirements
 GET  /api/product-requirements/:id
 ```
 
-#### Entity Hierarchy
+#### Entity hierarchy
 
 ```
 ProductRequirement (org-wide)
@@ -144,7 +146,7 @@ ProductRequirement (org-wide)
         -> TestCase (execution records)
 ```
 
-#### Chat API (LLM)
+### Chat API
 
 ```
 POST /api/chat   # Streaming natural language interface to manage PLM entities
@@ -157,12 +159,12 @@ Send `{ messages: [{ role, content }] }` with `x-demo-user-id` header. Returns a
 ```bash
 npm run dev          # Start dev server
 npm run build        # Production build
-npm run test         # Run tests (381 tests, uses .env.test database)
+npm run test         # Run tests (uses .env.test database)
 npm run test:watch   # Watch mode
 npm run lint         # ESLint
 ```
 
-### Project Structure
+### Project structure
 
 ```
 src/
@@ -192,15 +194,16 @@ docs/
 
 ### Documentation
 
-- [USER-GUIDE.md](docs/USER-GUIDE.md) - What the app does, how to use the chat, example prompts
+- [docs/JOURNEY.md](docs/JOURNEY.md) - How the project was built, phase by phase
+- [docs/AI-PRODUCT-GUIDE.md](docs/AI-PRODUCT-GUIDE.md) - How context engineering, orchestration, observability, and evals fit together
+- [docs/USER-GUIDE.md](docs/USER-GUIDE.md) - What the app does, how to use the chat, example prompts
 - [ROADMAP.md](ROADMAP.md) - V1 summary, V2/V3 planned features
-- [STATUS-GUIDE.md](docs/STATUS-GUIDE.md) - Full lifecycle status reference
-- [DATABASE.md](docs/DATABASE.md) - Schema documentation and seed data
-- [AI-PRODUCT-GUIDE.md](docs/AI-PRODUCT-GUIDE.md) - How context engineering, orchestration, observability, and evals fit together
-- [JOURNEY.md](docs/JOURNEY.md) - How the project was built, phase by phase
+- [docs/STATUS-GUIDE.md](docs/STATUS-GUIDE.md) - Full lifecycle status reference
+- [docs/DATABASE.md](docs/DATABASE.md) - Schema documentation and seed data
+- [AGENT-SETUP.md](AGENT-SETUP.md) - Clone-to-dev-server runbook for an AI agent with shell access
 
 ---
 
 ## Issue Log
 
-16 issues tracked. 15 completed, 1 open. See [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) for the full list.
+18 issues tracked. 15 completed, 3 open. See [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) for the full list.

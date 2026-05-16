@@ -21,7 +21,7 @@ Use [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) to report 
 ## Submitting Pull Requests
 
 - One branch per issue.
-- Run `npm run test` before opening a PR. All 381 tests should pass.
+- Run `npm run test` before opening a PR. All tests should pass.
 - Run `npm run lint` to check for style issues.
 - Keep PRs focused. If your change touches multiple concerns, split it into separate PRs.
 
@@ -30,9 +30,11 @@ Use [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) to report 
 If your change affects user-facing behavior, update the relevant docs:
 
 - [USER-GUIDE.md](docs/USER-GUIDE.md) for feature changes
+- [AI-PRODUCT-GUIDE.md](docs/AI-PRODUCT-GUIDE.md) for AI orchestration, tracing, or observability changes
 - [STATUS-GUIDE.md](docs/STATUS-GUIDE.md) for lifecycle rule changes
 - [DATABASE.md](docs/DATABASE.md) for schema changes
 - [ROADMAP.md](ROADMAP.md) for new planned features
+- [AGENT-SETUP.md](AGENT-SETUP.md) for setup/runbook changes
 
 ## Questions
 

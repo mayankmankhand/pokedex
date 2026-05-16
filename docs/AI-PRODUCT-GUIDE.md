@@ -14,7 +14,9 @@ In PLM, the system prompt gives the model its role, the lifecycle rules, and gui
 
 Orchestration is how you sequence model calls, combine their outputs, and handle failures. A single user message might trigger multiple tool calls - the model reads a requirement, checks its status, finds related test procedures, and then summarizes everything. You need to decide: does the model handle all of this in one turn, or do you break it into steps? What happens if a tool call fails halfway through?
 
-In PLM, the model handles orchestration itself through the Vercel AI SDK's multi-step tool calling. It can chain up to 25 tool calls in a single response, deciding on its own which tools to call and in what order. The confirm-before-act pattern is part of orchestration too - the model proposes a change, waits for the user to confirm, then executes it.
+In PLM, the model handles orchestration itself through the Vercel AI SDK's multi-step tool calling. It can chain up to 10 rounds of tool calls in a single response, deciding on its own which tools to call and in what order, across a toolbox of 45 tools (28 mutation, 5 read, 4 query, 8 UI intent). The confirm-before-act pattern is part of orchestration too - destructive operations are gated by a `z.literal(true)` confirmation flag, so the model has to propose the change, wait for the user to confirm, then re-invoke the tool with the flag set.
+
+The UI-intent tools are what give the context panel its life. The model decides when to push a detail view, render a table, build a Mermaid diagram, or surface an inline choice prompt (`presentChoices`) for the user to pick between 2-5 options. The panel is not a separate UI surface that listens for events; it is whatever the AI decided to put there during this turn. That keeps the response, the chat narration, and the panel content coherent.
 
 ## 3. Observability - Done
 
