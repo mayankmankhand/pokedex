@@ -1,6 +1,6 @@
 # Pokedex PLM
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-pokedex--plm.vercel.app-teal)](https://pokedex-plm.vercel.app) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)]()
+[![Live Demo](https://img.shields.io/badge/Live_Demo-pokedex--plm.vercel.app-teal)](https://pokedex-plm.vercel.app) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A chat-based Product Lifecycle Management app. Type what you need; the AI proposes the change; you confirm before anything is written.
 
@@ -159,7 +159,7 @@ Send `{ messages: [{ role, content }] }` with `x-demo-user-id` header. Returns a
 ```bash
 npm run dev          # Start dev server
 npm run build        # Production build
-npm run test         # Run tests (uses .env.test database)
+npm run test         # Vitest suite: lifecycle, schema, integration, panel (needs .env.test, see Quick start)
 npm run test:watch   # Watch mode
 npm run lint         # ESLint
 ```
@@ -207,3 +207,7 @@ docs/
 ## Issue Log
 
 18 issues tracked. 15 completed, 3 open. See [GitHub Issues](https://github.com/mayankmankhand/pokedex/issues) for the full list.
+
+---
+
+Built by [Mayank Mankhand](https://www.linkedin.com/in/mayankmankhand/), AI product manager. More at [github.com/mayankmankhand](https://github.com/mayankmankhand).
